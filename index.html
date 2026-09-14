@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f1eb">
+  <title>Our Little World</title>
+  <style>
+    :root {
+      --bg: #f7f1eb;
+      --paper: rgba(255,255,255,.78);
+      --paper-solid: #fffdfb;
+      --ink: #382f33;
+      --muted: #8e8184;
+      --rose: #b86473;
+      --rose-deep: #8d4352;
+      --blush: #f2d9da;
+      --peach: #efd8c6;
+      --sage: #b6c3ad;
+      --lavender: #d7cfe0;
+      --line: rgba(87,65,70,.11);
+      --shadow: 0 18px 55px rgba(75,52,57,.10);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x:hidden; background:
+        radial-gradient(circle at 8% 5%, rgba(242,217,218,.9), transparent 31rem),
+        radial-gradient(circle at 95% 92%, rgba(215,207,224,.6), transparent 33rem), var(--bg);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; z-index: 20; padding: 30px 22px;
+      background: rgba(255,253,251,.64); backdrop-filter: blur(22px);
+      border-right: 1px solid rgba(255,255,255,.8); display: flex; flex-direction: column;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; padding: 0 8px; }
+    .brand-mark { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 15px; background: var(--rose); color: white; box-shadow: 0 8px 20px rgba(184,100,115,.28); font-size: 20px; }
+    .brand b { font-family: Georgia, serif; font-size: 18px; }
+    .brand small { display: block; color: var(--muted); margin-top: 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    nav { margin-top: 38px; display: grid; gap: 7px; }
+    .nav-btn { border: 0; background: transparent; display: flex; align-items: center; gap: 13px; width: 100%; padding: 13px 14px; border-radius: 15px; cursor: pointer; color: #75686b; text-align: left; transition: .2s ease; }
+    .nav-btn .ico { width: 25px; font-size: 17px; text-align: center; filter: grayscale(.25); }
+    .nav-btn:hover { background: rgba(255,255,255,.65); transform: translateX(2px); }
+    .nav-btn.active { background: var(--paper-solid); color: var(--rose-deep); box-shadow: 0 8px 22px rgba(86,61,66,.08); font-weight: 650; }
+    .side-quote { margin-top: auto; padding: 17px; border-radius: 18px; background: linear-gradient(145deg, #f3dedb, #eee4dc); font: italic 14px/1.5 Georgia,serif; color: #72565d; }
+    main { min-width: 0; padding: 34px clamp(24px,4vw,62px) 70px; max-width: 1500px; width: 100%; margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .eyebrow { color: var(--rose); text-transform: uppercase; letter-spacing: .16em; font-size: 11px; font-weight: 750; }
+    h1 { margin: 5px 0 0; font: 400 clamp(28px,4vw,42px)/1.08 Georgia,serif; letter-spacing: -.03em; }
+    .today-pill { background: rgba(255,255,255,.72); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 8px 28px rgba(72,53,57,.07); border-radius: 99px; padding: 10px 15px; color: var(--muted); font-size: 13px; }
+    .tab { display: none; animation: enter .28s ease; }
+    .tab.active { display: block; }
+    @keyframes enter { from { opacity: 0; transform: translateY(7px); } }
+    .grid { display: grid; gap: 18px; min-width:0; }
+    .grid > * { min-width:0; }
+    .cols-2 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .cols-3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .card { background: var(--paper); border: 1px solid rgba(255,255,255,.82); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; backdrop-filter: blur(18px); }
+    .card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .card-title h2, .card-title h3 { margin: 0; font: 400 22px Georgia,serif; }
+    .card-title span { color: var(--muted); font-size: 12px; }
+    .hero { position: relative; min-height: 270px; overflow: hidden; background: linear-gradient(135deg, #bd707d 0%, #a65a68 55%, #784853 100%); color: white; display: flex; flex-direction: column; justify-content: space-between; }
+    .hero::after { content:""; position:absolute; width:310px; height:310px; border:1px solid rgba(255,255,255,.22); border-radius:50%; right:-100px; top:-125px; box-shadow: 0 0 0 36px rgba(255,255,255,.04), 0 0 0 76px rgba(255,255,255,.035); }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-kicker { color: #f8e7e8; font-size: 12px; text-transform: uppercase; letter-spacing: .15em; }
+    .hero h2 { font: 400 clamp(30px,4vw,46px)/1.05 Georgia,serif; margin: 9px 0; max-width: 620px; }
+    .live-time { display: flex; gap: clamp(12px,3vw,35px); flex-wrap: wrap; margin-top: 24px; }
+    .time-unit b { display:block; font: 400 27px Georgia,serif; }
+    .time-unit small { color: #f5dcdf; text-transform: uppercase; letter-spacing: .1em; font-size: 9px; }
+    .quick-stat { min-height: 122px; display: flex; align-items: center; gap: 17px; }
+    .stat-icon { flex: 0 0 49px; width:49px; height:49px; display:grid; place-items:center; border-radius:17px; font-size:21px; }
+    .stat-icon.pink { background: var(--blush); } .stat-icon.sage { background:#dfe7da; } .stat-icon.lav { background:#e9e3ef; }
+    .quick-stat b { display:block; font: 400 24px Georgia,serif; }
+    .quick-stat small { color:var(--muted); }
+    .primary, .ghost, .danger { border:0; border-radius:13px; padding:11px 16px; cursor:pointer; transition:.2s; font-weight:650; font-size:13px; }
+    .primary { color:white; background:var(--rose); box-shadow:0 7px 16px rgba(184,100,115,.23); }
+    .primary:hover { background:var(--rose-deep); transform:translateY(-1px); }
+    .ghost { background:#f2ece7; color:#74676a; }
+    .ghost:hover { background:#ebe1da; }
+    .danger { color:#a94e5f; background:#f8e3e5; }
+    .text-btn { background:none; border:0; cursor:pointer; color:var(--rose); font-weight:700; padding:4px; }
+    .section-lead { margin:-12px 0 23px; color:var(--muted); max-width:670px; line-height:1.55; }
+    label { display:block; color:#706367; font-size:12px; font-weight:700; margin-bottom:7px; }
+    input, textarea, select { width:100%; border:1px solid var(--line); background:rgba(255,255,255,.7); color:var(--ink); border-radius:13px; padding:12px 13px; outline:none; transition:.2s; }
+    input:focus, textarea:focus, select:focus { border-color:rgba(184,100,115,.55); box-shadow:0 0 0 3px rgba(184,100,115,.09); }
+    textarea { resize:vertical; min-height:120px; line-height:1.5; }
+    .field { margin-bottom:15px; }
+    .field-row { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+    .calendar-wrap { display:grid; grid-template-columns:minmax(440px,1.5fr) minmax(280px,.72fr); gap:18px; }
+    .cal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    .cal-head h2 { margin:0; font:400 25px Georgia,serif; }
+    .round-btn { border:0; background:#f2ece7; border-radius:11px; width:37px; height:37px; cursor:pointer; font-size:18px; }
+    .weekdays, .days-grid { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; gap:5px; }
+    .weekdays { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:7px; }
+    .day { min-height:67px; border:1px solid transparent; background:transparent; border-radius:14px; padding:7px 4px; cursor:pointer; position:relative; transition:.16s; }
+    .day:hover { background:#faf4ef; }
+    .day.other { opacity:.3; }
+    .day.today { border-color:rgba(184,100,115,.35); }
+    .day.selected { background:var(--rose); color:white; }
+    .day.period:not(.selected) { background:#f5dfe1; color:#8d4352; }
+    .day-number { font-weight:650; font-size:13px; }
+    .day-dots { display:flex; justify-content:center; gap:3px; height:7px; margin-top:8px; }
+    .dot { width:5px; height:5px; border-radius:50%; background:#ad9cb8; }
+    .day.selected .dot { background:white; opacity:.75; }
+    .choice-title { font-size:11px; text-transform:uppercase; letter-spacing:.11em; color:var(--muted); font-weight:750; margin:18px 0 10px; }
+    .chips { display:flex; flex-wrap:wrap; gap:7px; }
+    .chip { background:#f5efea; border:1px solid transparent; padding:8px 11px; border-radius:99px; cursor:pointer; font-size:12px; }
+    .chip.active { background:var(--blush); border-color:#dfafb6; color:var(--rose-deep); font-weight:700; }
+    .flow-options { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+    .flow { border:1px solid var(--line); background:rgba(255,255,255,.55); border-radius:12px; padding:10px 4px; font-size:11px; cursor:pointer; }
+    .flow.active { color:white; background:var(--rose); }
+    .upload-zone { border:1.5px dashed #d9c7c8; border-radius:20px; padding:35px 20px; text-align:center; cursor:pointer; background:rgba(255,255,255,.36); transition:.2s; }
+    .upload-zone.drag { border-color:var(--rose); background:#f9e9e9; transform:scale(.995); }
+    .upload-zone .big { font-size:31px; margin-bottom:8px; }
+    .upload-zone b { display:block; font:400 20px Georgia,serif; }
+    .upload-zone small { color:var(--muted); }
+    #photoInput { display:none; }
+    .photo-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .photo { aspect-ratio:1/1.08; border-radius:17px; overflow:hidden; position:relative; background:#eadfd8; cursor:pointer; box-shadow:0 8px 20px rgba(74,53,57,.08); }
+    .photo img { width:100%; height:100%; object-fit:cover; transition:.3s; }
+    .photo:hover img { transform:scale(1.035); }
+    .photo-overlay { position:absolute; inset:auto 0 0; padding:25px 11px 10px; color:white; font-size:11px; background:linear-gradient(transparent,rgba(38,25,28,.72)); opacity:0; transition:.2s; }
+    .photo:hover .photo-overlay { opacity:1; }
+    .empty { padding:32px; text-align:center; color:var(--muted); border:1px dashed #dfd2cb; border-radius:18px; }
+    .mood-hero { display:flex; gap:17px; align-items:center; padding:6px 0 18px; }
+    .mood-face { width:72px; height:72px; border-radius:25px; display:grid; place-items:center; font-size:36px; background:#f2dfd6; }
+    .mood-pick { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; }
+    .mood-option { border:1px solid var(--line); background:rgba(255,255,255,.5); border-radius:16px; padding:13px 5px; cursor:pointer; text-align:center; }
+    .mood-option span { display:block; font-size:26px; margin-bottom:4px; }
+    .mood-option small { color:var(--muted); font-size:10px; }
+    .mood-option.active { background:#f2dfd6; border-color:#dfb5aa; transform:translateY(-2px); }
+    input[type=range] { padding:0; accent-color:var(--rose); }
+    .history { display:grid; gap:9px; max-height:450px; overflow:auto; }
+    .history-item { display:flex; align-items:center; gap:12px; padding:12px 13px; background:rgba(255,255,255,.46); border-radius:14px; }
+    .history-item .emoji { font-size:24px; }
+    .history-item b { font-size:13px; } .history-item small { color:var(--muted); display:block; margin-top:2px; }
+    .history-item .spacer { flex:1; }
+    .together-display { text-align:center; padding:28px 10px; background:linear-gradient(145deg,#f6e3e1,#eee0d4); border-radius:21px; margin-bottom:20px; }
+    .together-display .heart { font-size:35px; }
+    .together-display h2 { font:400 37px Georgia,serif; margin:10px 0 4px; }
+    .together-display p { color:var(--muted); margin:0; }
+    .duration-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .duration-box { text-align:center; background:rgba(255,255,255,.58); padding:17px 7px; border-radius:15px; }
+    .duration-box b { display:block; font:400 27px Georgia,serif; }
+    .duration-box small { color:var(--muted); text-transform:uppercase; font-size:9px; letter-spacing:.1em; }
+    .note-toolbar { display:flex; gap:10px; margin-bottom:18px; }
+    .note-toolbar input { flex:1; }
+    .notes-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .note { min-height:180px; display:flex; flex-direction:column; padding:20px; border-radius:19px; background:#f8e8df; box-shadow:0 12px 28px rgba(72,52,56,.07); }
+    .note:nth-child(3n+2) { background:#e8e6ed; } .note:nth-child(3n+3) { background:#e7ecdf; }
+    .note h3 { font:400 19px Georgia,serif; margin:0 0 10px; }
+    .note p { white-space:pre-wrap; margin:0; color:#695c60; font-size:13px; line-height:1.55; overflow-wrap:anywhere; }
+    .note footer { margin-top:auto; padding-top:15px; display:flex; justify-content:space-between; color:#96898b; font-size:10px; }
+    .note footer button { border:0; background:none; color:#9a5864; cursor:pointer; }
+    .modal { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(47,34,37,.53); backdrop-filter:blur(9px); }
+    .modal.open { display:flex; }
+    .modal-box { width:min(520px,100%); max-height:90vh; overflow:auto; background:var(--paper-solid); border-radius:25px; padding:24px; box-shadow:0 25px 80px rgba(35,22,25,.3); }
+    .modal-box.wide { width:min(840px,100%); padding:16px; }
+    .modal-box.wide img { width:100%; max-height:72vh; object-fit:contain; border-radius:17px; background:#251d1f; }
+    .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:17px; }
+    .modal-head h2 { margin:0; font:400 24px Georgia,serif; }
+    .close { border:0; background:#f2ece7; width:35px; height:35px; border-radius:50%; cursor:pointer; }
+    .toast { position:fixed; right:24px; bottom:24px; z-index:200; color:white; background:#4f4245; padding:12px 17px; border-radius:13px; box-shadow:0 12px 30px rgba(0,0,0,.18); opacity:0; transform:translateY(14px); pointer-events:none; transition:.25s; font-size:13px; }
+    .toast.show { opacity:1; transform:none; }
+    .data-box { margin-top:18px; display:flex; justify-content:space-between; align-items:center; gap:14px; padding:15px; border:1px solid var(--line); border-radius:16px; }
+    .card { transition:transform .22s ease, box-shadow .22s ease; }
+    .card:not(.hero):hover { transform:translateY(-2px); box-shadow:0 22px 62px rgba(75,52,57,.13); }
+    .fun-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:18px; margin-top:18px; }
+    .prompt-card { position:relative; overflow:hidden; min-height:190px; background:linear-gradient(145deg,#fff9f5,#f5e1de); }
+    .prompt-card::after { content:'?'; position:absolute; right:18px; bottom:-34px; font:120px Georgia,serif; color:rgba(184,100,115,.07); transform:rotate(9deg); }
+    .prompt-text { position:relative; z-index:1; max-width:620px; font:400 clamp(20px,2.6vw,29px)/1.3 Georgia,serif; margin:13px 0 22px; }
+    .love-btn { min-width:48px; font-size:17px; }
+    .milestone { display:flex; flex-direction:column; justify-content:space-between; background:linear-gradient(145deg,#ece8f1,#f9f6f2); }
+    .milestone-number { font:400 36px Georgia,serif; margin:7px 0 2px; }
+    .progress-track { height:9px; border-radius:99px; background:rgba(255,255,255,.78); overflow:hidden; margin-top:17px; }
+    .progress-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--rose),#c88ea0); transition:width .8s cubic-bezier(.2,.8,.2,1); }
+    .trend { height:128px; display:flex; align-items:end; gap:8px; padding:8px 2px 0; margin-bottom:18px; border-bottom:1px solid var(--line); }
+    .trend-col { flex:1; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:end; gap:5px; min-width:0; }
+    .trend-bar { width:min(34px,75%); min-height:7px; border-radius:9px 9px 3px 3px; background:linear-gradient(#d9a5ad,var(--rose)); transform-origin:bottom; animation:growBar .55s both; }
+    .trend-col small { color:var(--muted); font-size:9px; }
+    @keyframes growBar { from { transform:scaleY(0); } }
+    .celebrate-heart { position:fixed; z-index:300; pointer-events:none; font-size:18px; animation:heartBurst .95s ease-out forwards; }
+    @keyframes heartBurst { 0%{opacity:0;transform:translate(-50%,-20%) scale(.4) rotate(0)} 18%{opacity:1} 100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.25) rotate(var(--rot))} }
+    .saved-pop { animation:savedPop .4s ease; }
+    @keyframes savedPop { 50%{transform:scale(1.045)} }
+    .surprise-row { display:flex; justify-content:flex-end; margin-bottom:12px; }
+    .auth-screen { position:fixed; inset:0; z-index:500; display:grid; place-items:center; padding:22px; overflow:auto; background:radial-gradient(circle at 15% 10%,#f3d9db,transparent 35rem),radial-gradient(circle at 90% 90%,#dcd3e4,transparent 35rem),#f7f1eb; }
+    .auth-screen.hidden { display:none; }
+    .auth-card { width:min(470px,100%); background:rgba(255,253,251,.9); border:1px solid rgba(255,255,255,.9); border-radius:30px; padding:clamp(24px,5vw,38px); box-shadow:0 30px 90px rgba(75,52,57,.16); backdrop-filter:blur(20px); }
+    .auth-logo { width:58px; height:58px; display:grid; place-items:center; margin-bottom:22px; border-radius:20px; background:var(--rose); color:white; font-size:25px; box-shadow:0 11px 25px rgba(184,100,115,.3); }
+    .auth-card h1 { font-size:34px; margin-bottom:8px; }
+    .auth-card > p { color:var(--muted); line-height:1.55; margin:0 0 23px; }
+    .auth-status { min-height:20px; color:var(--rose-deep); font-size:12px; margin:10px 0; line-height:1.45; }
+    .auth-switch { text-align:center; color:var(--muted); margin-top:18px; font-size:12px; }
+    .auth-pane { display:none; }.auth-pane.active { display:block; }
+    .join-divider { display:flex; align-items:center; gap:10px; margin:22px 0; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.12em; }
+    .join-divider::before,.join-divider::after { content:''; height:1px; flex:1; background:var(--line); }
+    .sync-pill { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.72); border-radius:99px; padding:10px 14px; color:var(--muted); font-size:11px; }
+    .sync-dot { width:7px; height:7px; border-radius:50%; background:#d09a5f; box-shadow:0 0 0 3px rgba(208,154,95,.12); }
+    .sync-pill.online .sync-dot { background:#72a578; box-shadow:0 0 0 3px rgba(114,165,120,.13); }
+    .top-actions { display:flex; align-items:center; gap:9px; }
+    .invite-code { display:block; font:600 24px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.12em; color:var(--rose-deep); margin-top:3px; }
+    .cloud-share { margin-top:18px; background:linear-gradient(145deg,#f8e9e5,#eee9f2); }
+    .cloud-share p { color:var(--muted); line-height:1.5; font-size:13px; }
+    @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
+    @media (max-width:1000px) { .photo-grid{grid-template-columns:repeat(3,1fr)} .notes-grid{grid-template-columns:repeat(2,1fr)} .calendar-wrap{grid-template-columns:1fr} }
+    @media (max-width:760px) {
+      .shell{display:block}.sidebar{position:fixed; top:auto; bottom:0; left:0; right:0; width:100%; height:auto; padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)); border:0; border-top:1px solid var(--line); z-index:50}
+      .brand,.side-quote{display:none}nav{margin:0; grid-template-columns:repeat(6,1fr); gap:2px}.nav-btn{display:grid; place-items:center; gap:1px; padding:7px 2px; font-size:9px; text-align:center}.nav-btn .ico{font-size:17px}.nav-btn:hover{transform:none}.nav-btn.active{box-shadow:none;background:#f4e7e5}
+      main{padding:24px 15px 105px}.topbar{margin-bottom:22px}.today-pill{display:none}.sync-pill{padding:9px}.sync-pill span:last-child{display:none}.cols-2,.cols-3,.fun-grid{grid-template-columns:1fr}.hero{min-height:300px}.calendar-wrap{display:block}.calendar-wrap>.card+ .card{margin-top:16px}.photo-grid{grid-template-columns:repeat(2,1fr)}.notes-grid{grid-template-columns:1fr}.mood-pick{grid-template-columns:repeat(5,1fr)}.mood-option{padding:11px 2px}.mood-option small{font-size:8px}.field-row{grid-template-columns:1fr 1fr}.day{min-height:51px;padding:6px 2px}.duration-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:400px){ .nav-btn{font-size:0}.nav-btn .ico{font-size:19px}.photo-grid{grid-template-columns:1fr 1fr}.card{padding:18px}.flow-options{grid-template-columns:repeat(2,1fr)} }
+  </style>
+</head>
+<body>
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-logo">♥</div>
+      <div class="auth-pane active" id="authPane">
+        <div class="eyebrow">A private space for two</div><h1 id="authTitle">Welcome back</h1><p id="authLead">Sign in to open your shared little world.</p>
+        <div class="field" id="nameField" hidden><label for="authName">Your name</label><input id="authName" autocomplete="name" placeholder="What should we call you?"></div>
+        <div class="field"><label for="authEmail">Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+        <div class="field"><label for="authPassword">Password</label><input type="password" id="authPassword" autocomplete="current-password" minlength="8" placeholder="At least 8 characters"></div>
+        <div class="auth-status" id="authStatus"></div><button class="primary" id="authSubmit" style="width:100%">Sign in</button>
+        <div class="auth-switch">New here? <button class="text-btn" id="authToggle">Create an account</button></div>
+      </div>
+      <div class="auth-pane" id="setupPane">
+        <div class="eyebrow">Connect your accounts</div><h1>Your shared space</h1><p>Create a new space and invite your partner, or join one using their code.</p>
+        <div class="field"><label for="spaceName">Space name</label><input id="spaceName" value="Our Little World" maxlength="60"></div><button class="primary" id="createSpace" style="width:100%">Create our space</button>
+        <div class="join-divider">or join your partner</div>
+        <div class="field"><label for="joinCode">Eight-character invite code</label><input id="joinCode" maxlength="8" autocomplete="off" placeholder="AB12CD34" style="text-transform:uppercase"></div><button class="ghost" id="joinSpace" style="width:100%">Join shared space</button>
+        <div class="auth-status" id="setupStatus"></div><div class="auth-switch"><button class="text-btn" id="setupSignOut">Sign out</button></div>
+      </div>
+      <div class="auth-pane" id="configPane">
+        <div class="eyebrow">One-time setup needed</div><h1>Connect Supabase</h1><p>This cloud edition needs your Supabase project URL and publishable key. Follow the included README, then reload this page.</p>
+        <div class="data-box"><div><small>Setup guide</small><b style="display:block;margin-top:3px">README.md</b></div><span style="font-size:24px">⚙</span></div>
+      </div>
+    </div>
+  </section>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">♥</div><div><b>Our Little World</b><small>just us</small></div></div>
+      <nav aria-label="Main navigation">
+        <button class="nav-btn active" data-tab="home"><span class="ico">⌂</span>Home</button>
+        <button class="nav-btn" data-tab="calendar"><span class="ico">□</span>Calendar</button>
+        <button class="nav-btn" data-tab="mood"><span class="ico">☻</span>Mood</button>
+        <button class="nav-btn" data-tab="photos"><span class="ico">▧</span>Photos</button>
+        <button class="nav-btn" data-tab="together"><span class="ico">♡</span>Together</button>
+        <button class="nav-btn" data-tab="notes"><span class="ico">✎</span>Notes</button>
+      </nav>
+      <div class="side-quote">“The best thing to hold onto in life is each other.”</div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><div class="eyebrow" id="pageEyebrow">Your shared space</div><h1 id="pageTitle">Good to see you</h1></div>
+        <div class="top-actions"><div class="sync-pill" id="syncPill"><i class="sync-dot"></i><span id="syncStatus">Connecting…</span></div><div class="today-pill" id="todayText"></div></div>
+      </header>
+
+      <section class="tab active" id="home">
+        <div class="grid cols-2">
+          <article class="card hero">
+            <div><div class="hero-kicker">Our story, still unfolding</div><h2 id="heroMessage">Every day together is worth remembering.</h2></div>
+            <div class="live-time" id="homeDuration"></div>
+          </article>
+          <div class="grid">
+            <article class="card quick-stat"><div class="stat-icon pink">◷</div><div><small>Next expected period</small><b id="nextPeriod">Add cycle dates</b></div></article>
+            <article class="card quick-stat"><div class="stat-icon lav">☻</div><div><small>Latest mood</small><b id="latestMood">No check-in yet</b></div></article>
+          </div>
+        </div>
+        <div class="grid cols-3" style="margin-top:18px">
+          <article class="card quick-stat"><div class="stat-icon sage">▧</div><div><b id="photoCount">0 memories</b><small>in your photo book</small></div></article>
+          <article class="card quick-stat"><div class="stat-icon pink">✎</div><div><b id="noteCount">0 notes</b><small>thoughts saved</small></div></article>
+          <article class="card quick-stat"><div class="stat-icon lav">♡</div><div><b id="cycleDay">Cycle not set</b><small>personal cycle view</small></div></article>
+        </div>
+        <div class="fun-grid">
+          <article class="card prompt-card">
+            <div class="eyebrow">A little question for us</div>
+            <div class="prompt-text" id="couplePrompt">What tiny moment with me always makes you smile?</div>
+            <div class="actions"><button class="primary" id="newPrompt">Another question</button><button class="ghost love-btn" id="loveBtn" aria-label="Send a little love">♥ <span id="loveCount">0</span></button></div>
+          </article>
+          <article class="card milestone">
+            <div><div class="eyebrow">Next little milestone</div><div class="milestone-number" id="milestoneTitle">Set your beginning</div><small id="milestoneText" style="color:var(--muted)">Your countdown will appear here.</small></div>
+            <div><div class="progress-track"><div class="progress-fill" id="milestoneProgress"></div></div></div>
+          </article>
+        </div>
+        <article class="card" style="margin-top:18px">
+          <div class="card-title"><h2>Keep your world safe</h2><span>Private by design</span></div>
+          <p class="section-lead" style="margin-top:0">Everything is stored only in this browser. Save a backup if you plan to clear browser data or move devices.</p>
+          <div class="actions"><button class="primary" id="exportBtn">Export backup</button><button class="ghost" id="importBtn">Import backup</button><input type="file" id="importFile" accept="application/json" hidden></div>
+        </article>
+      </section>
+
+      <section class="tab" id="calendar">
+        <p class="section-lead">Tap a day to privately log period flow, symptoms, and how you felt.</p>
+        <div class="calendar-wrap">
+          <article class="card">
+            <div class="cal-head"><button class="round-btn" id="prevMonth" aria-label="Previous month">‹</button><h2 id="monthTitle"></h2><button class="round-btn" id="nextMonth" aria-label="Next month">›</button></div>
+            <div class="weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+            <div class="days-grid" id="daysGrid"></div>
+          </article>
+          <article class="card" id="dayEditor">
+            <div class="card-title"><h3 id="selectedDateTitle">Today</h3><span id="cycleHint"></span></div>
+            <div class="choice-title">Period flow</div>
+            <div class="flow-options" id="flowOptions"><button class="flow" data-flow="none">None</button><button class="flow" data-flow="light">Light</button><button class="flow" data-flow="medium">Medium</button><button class="flow" data-flow="heavy">Heavy</button></div>
+            <div class="choice-title">Mood</div><div class="chips" id="dayMoods"><button class="chip" data-value="happy">😊 Happy</button><button class="chip" data-value="calm">😌 Calm</button><button class="chip" data-value="low">😔 Low</button><button class="chip" data-value="sensitive">🥺 Sensitive</button><button class="chip" data-value="irritable">😤 Irritable</button></div>
+            <div class="choice-title">Symptoms</div><div class="chips" id="symptoms"><button class="chip" data-value="cramps">Cramps</button><button class="chip" data-value="headache">Headache</button><button class="chip" data-value="bloating">Bloating</button><button class="chip" data-value="tenderness">Tenderness</button><button class="chip" data-value="fatigue">Fatigue</button><button class="chip" data-value="cravings">Cravings</button></div>
+            <div class="field" style="margin-top:18px"><label for="dayNote">Day note</label><textarea id="dayNote" rows="3" placeholder="Anything you want to remember..."></textarea></div>
+            <button class="primary" id="saveDay">Save this day</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab" id="mood">
+        <p class="section-lead">A gentle check-in for your emotions, energy, and anything on your mind.</p>
+        <div class="grid cols-2">
+          <article class="card">
+            <div class="mood-hero"><div class="mood-face" id="bigMood">😊</div><div><div class="eyebrow">Today's check-in</div><h2 style="font:400 25px Georgia,serif;margin:5px 0">How are you feeling?</h2></div></div>
+            <div class="mood-pick" id="moodPicker"><button class="mood-option active" data-mood="amazing" data-emoji="🤩"><span>🤩</span><small>Amazing</small></button><button class="mood-option" data-mood="good" data-emoji="😊"><span>😊</span><small>Good</small></button><button class="mood-option" data-mood="okay" data-emoji="😐"><span>😐</span><small>Okay</small></button><button class="mood-option" data-mood="low" data-emoji="😔"><span>😔</span><small>Low</small></button><button class="mood-option" data-mood="rough" data-emoji="😣"><span>😣</span><small>Rough</small></button></div>
+            <div class="field" style="margin-top:22px"><label for="energy">Energy level · <span id="energyValue">7</span>/10</label><input type="range" id="energy" min="1" max="10" value="7"></div>
+            <div class="field"><label for="moodText">What is on your mind?</label><textarea id="moodText" placeholder="No pressure—write as much or as little as you like."></textarea></div>
+            <button class="primary" id="saveMood">Save check-in</button>
+          </article>
+          <article class="card"><div class="card-title"><h2>Recent feelings</h2><span>Your timeline</span></div><div class="trend" id="moodTrend"></div><div class="history" id="moodHistory"></div></article>
+        </div>
+      </section>
+
+      <section class="tab" id="photos">
+        <p class="section-lead">A private little photo book for favorite dates, quiet moments, and everything between.</p>
+        <article class="card">
+          <div class="surprise-row"><button class="ghost" id="surprisePhoto">✦ Surprise me with a memory</button></div>
+          <div class="upload-zone" id="uploadZone" tabindex="0"><div class="big">＋</div><b>Add a new memory</b><small>Choose or drop JPG, PNG, GIF, or WebP photos here</small></div>
+          <input type="file" id="photoInput" accept="image/*" multiple>
+          <div class="photo-grid" id="photoGrid"></div>
+        </article>
+      </section>
+
+      <section class="tab" id="together">
+        <p class="section-lead">Count every day, hour, and minute of your story. Use a start date or set the elapsed time manually.</p>
+        <div class="grid cols-2">
+          <article class="card">
+            <div class="together-display"><div class="heart">♥</div><h2>Us, in time</h2><p id="sinceText">Add your beginning below</p></div>
+            <div class="duration-grid" id="togetherDuration"></div>
+          </article>
+          <article class="card">
+            <div class="card-title"><h2>Our beginning</h2><span>Edit anytime</span></div>
+            <div class="field"><label for="startDate">Relationship start date & time</label><input type="datetime-local" id="startDate"></div>
+            <button class="primary" id="saveStart">Save start date</button>
+            <div class="choice-title" style="display:flex;align-items:center;gap:10px"><span style="height:1px;flex:1;background:var(--line)"></span>or enter elapsed time<span style="height:1px;flex:1;background:var(--line)"></span></div>
+            <div class="field-row"><div class="field"><label for="manualDays">Days</label><input type="number" id="manualDays" min="0" value="0"></div><div class="field"><label for="manualHours">Hours</label><input type="number" id="manualHours" min="0" max="23" value="0"></div><div class="field"><label for="manualMinutes">Minutes</label><input type="number" id="manualMinutes" min="0" max="59" value="0"></div></div>
+            <button class="ghost" id="setManual">Set elapsed time</button>
+            <div class="field" style="margin-top:20px"><label for="coupleNames">Our names</label><input id="coupleNames" placeholder="e.g. Alex & Sam"></div>
+            <div class="field"><label for="relationshipMessage">Our little message</label><input id="relationshipMessage" placeholder="Every day together is worth remembering."></div>
+            <button class="ghost" id="saveProfile">Update home</button>
+          </article>
+        </div>
+        <article class="card cloud-share">
+          <div class="card-title"><h2>Share with your partner</h2><span id="memberStatus">Private cloud</span></div>
+          <p>Your partner creates their own account, then joins using this code. Only the two members of this space can access its records and photos.</p>
+          <div class="data-box"><div><small>Invite code</small><b class="invite-code" id="inviteCode">••••••••</b></div><div class="actions"><button class="primary" id="copyInvite">Copy code</button><button class="ghost" id="signOut">Sign out</button></div></div>
+          <small id="accountEmail" style="display:block;color:var(--muted);margin-top:12px"></small>
+        </article>
+      </section>
+
+      <section class="tab" id="notes">
+        <p class="section-lead">Love letters, plans, reminders, and thoughts—kept together in one peaceful place.</p>
+        <div class="note-toolbar"><input id="noteSearch" type="search" placeholder="Search your notes..."><button class="primary" id="newNote">＋ New note</button></div>
+        <div class="notes-grid" id="notesGrid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="noteModal"><div class="modal-box"><div class="modal-head"><h2>New note</h2><button class="close" data-close="noteModal">×</button></div><div class="field"><label for="noteTitle">Title</label><input id="noteTitle" placeholder="A title for this thought"></div><div class="field"><label for="noteBody">Note</label><textarea id="noteBody" placeholder="Write from the heart..."></textarea></div><button class="primary" id="saveNote">Save note</button></div></div>
+  <div class="modal" id="photoModal"><div class="modal-box"><div class="modal-head"><h2>New memory</h2><button class="close" data-close="photoModal">×</button></div><div class="field"><label for="photoCaption">Caption</label><input id="photoCaption" placeholder="What made this moment special?"></div><div class="field"><label for="photoDate">Date</label><input type="date" id="photoDate"></div><div id="photoQueueText" class="section-lead" style="margin:0 0 16px"></div><button class="primary" id="savePhotos">Add to photo book</button></div></div>
+  <div class="modal" id="viewerModal"><div class="modal-box wide"><div class="modal-head"><h2 id="viewerTitle">Memory</h2><button class="close" data-close="viewerModal">×</button></div><img id="viewerImage" alt="Saved memory"><div class="actions" style="justify-content:space-between;margin-top:12px"><span id="viewerDate" style="color:var(--muted);font-size:12px"></span><button class="danger" id="deletePhoto">Delete photo</button></div></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (() => {
+    'use strict';
+    const $ = (s, p=document) => p.querySelector(s), $$ = (s,p=document) => [...p.querySelectorAll(s)];
+    const STORE = 'ourLittleWorld.v1';
+    const todayKey = () => localDateKey(new Date());
+    const localDateKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const esc = s => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const defaultData = { relationshipStart:null, names:'', message:'', cycle:{}, moods:[], notes:[], loveCount:0, promptOffset:0 };
+    let supa=null, currentUser=null, coupleId=null, coupleInfo=null, cloudReady=false, syncTimer=null, realtimeChannel=null;
+    let data;
+    try { data = {...defaultData, ...JSON.parse(localStorage.getItem(STORE) || '{}')}; } catch { data = structuredClone(defaultData); }
+    data.cycle ||= {}; data.moods ||= []; data.notes ||= [];
+    const persist = () => { localStorage.setItem(STORE, JSON.stringify(data)); refreshHome(); if(cloudReady){setSync('Saving…',false);clearTimeout(syncTimer);syncTimer=setTimeout(saveCloudState,450);} };
+    const toast = msg => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),2300); };
+    const openModal = id => $('#'+id).classList.add('open');
+    const closeModal = id => $('#'+id).classList.remove('open');
+    const dateFmt = (key, opts={weekday:'long',month:'long',day:'numeric'}) => new Date(key+'T12:00:00').toLocaleDateString(undefined,opts);
+    const couplePrompts = [
+      'What tiny moment with me always makes you smile?',
+      'If we could wake up anywhere tomorrow, where would we be?',
+      'What song feels the most like our story?',
+      'What is one date you would love for us to try?',
+      'Which ordinary moment together do you secretly treasure?',
+      'What did you first notice about me?',
+      'What is something new you want us to learn together?',
+      'Which of our memories would you happily relive today?',
+      'What is one thing I do that makes you feel cared for?',
+      'Describe our perfect lazy day in three words.',
+      'What do you hope we are laughing about a year from now?',
+      'What silly nickname should we invent for each other?'
+    ];
+
+    const showPane=id=>$$('.auth-pane').forEach(p=>p.classList.toggle('active',p.id===id));
+    const setSync=(message,online=true)=>{ $('#syncStatus').textContent=message; $('#syncPill').classList.toggle('online',online); };
+    function normalizeState(value){const v={...defaultData,...(value||{})};v.cycle||={};v.moods||=[];v.notes||=[];return v;}
+    function hasMeaningfulData(v){return !!(v.relationshipStart||v.names||v.message||Object.keys(v.cycle||{}).length||(v.moods||[]).length||(v.notes||[]).length||v.loveCount);}
+    async function saveCloudState(){
+      if(!cloudReady||!coupleId)return;
+      const {error}=await supa.from('couple_state').upsert({couple_id:coupleId,data,updated_by:currentUser.id,updated_at:new Date().toISOString()},{onConflict:'couple_id'});
+      if(error){setSync('Could not sync',false);toast('Cloud save failed: '+error.message);}else setSync('Cloud synced',true);
+    }
+    async function initCloud(){
+      const cfg=window.OUR_LITTLE_WORLD_CONFIG||{};
+      if(!window.supabase||!cfg.supabaseUrl||cfg.supabaseUrl.includes('YOUR_')||!cfg.supabaseAnonKey||cfg.supabaseAnonKey.includes('YOUR_')){showPane('configPane');return;}
+      supa=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const {data:{session}}=await supa.auth.getSession();
+      if(session)await loadUser(session.user);else showPane('authPane');
+    }
+    async function loadUser(user){
+      currentUser=user;setSync('Connecting…',false);
+      const {data:membership,error}=await supa.from('couple_members').select('couple_id,role').eq('user_id',user.id).maybeSingle();
+      if(error){$('#authStatus').textContent=error.message;showPane('authPane');return;}
+      if(!membership){showPane('setupPane');return;}
+      coupleId=membership.couple_id;
+      const {data:space,error:spaceError}=await supa.from('couples').select('id,name,invite_code').eq('id',coupleId).single();
+      if(spaceError){$('#authStatus').textContent=spaceError.message;showPane('authPane');return;}
+      coupleInfo=space;await enterCloudApp();
+    }
+    async function enterCloudApp(){
+      const localSnapshot=structuredClone(data);let localPhotos=[];try{localPhotos=await photoDB.localAll()}catch{}
+      const {data:state,error}=await supa.from('couple_state').select('data').eq('couple_id',coupleId).maybeSingle();
+      if(error){$('#authStatus').textContent=error.message;showPane('authPane');return;}
+      const remote=state?.data||{}, shouldMigrate=!hasMeaningfulData(remote)&&hasMeaningfulData(localSnapshot)&&confirm('We found information in the standalone browser version. Copy it into your private cloud space now?');
+      data=shouldMigrate?normalizeState(localSnapshot):normalizeState(remote);cloudReady=true;localStorage.setItem(STORE,JSON.stringify(data));
+      if(!state||shouldMigrate)await saveCloudState();
+      $('#inviteCode').textContent=coupleInfo.invite_code;$('#accountEmail').textContent=`Signed in as ${currentUser.email}`;
+      const {count}=await supa.from('couple_members').select('*',{count:'exact',head:true}).eq('couple_id',coupleId);$('#memberStatus').textContent=count===2?'Both partners connected':'Waiting for your partner';
+      subscribeToCloud();$('#authScreen').classList.add('hidden');renderAll();
+      if(shouldMigrate&&localPhotos.length){toast(`Moving ${localPhotos.length} local ${localPhotos.length===1?'photo':'photos'} to the cloud…`);for(const photo of localPhotos){try{await photoDB.put(photo)}catch{}}renderPhotos();toast('Standalone data copied to the cloud');}
+    }
+    function subscribeToCloud(){
+      if(realtimeChannel)supa.removeChannel(realtimeChannel);
+      realtimeChannel=supa.channel(`our-world-${coupleId}`)
+        .on('postgres_changes',{event:'UPDATE',schema:'public',table:'couple_state',filter:`couple_id=eq.${coupleId}`},payload=>{if(payload.new.updated_by===currentUser.id)return;data=normalizeState(payload.new.data);localStorage.setItem(STORE,JSON.stringify(data));renderAll();toast('Synced changes from your partner');})
+        .on('postgres_changes',{event:'*',schema:'public',table:'photos',filter:`couple_id=eq.${coupleId}`},()=>{renderPhotos();})
+        .subscribe(status=>setSync(status==='SUBSCRIBED'?'Cloud synced':'Connecting…',status==='SUBSCRIBED'));
+    }
+    let authMode='signin';
+    $('#authToggle').onclick=()=>{authMode=authMode==='signin'?'signup':'signin';const signup=authMode==='signup';$('#authTitle').textContent=signup?'Create your account':'Welcome back';$('#authLead').textContent=signup?'Start a private space, then invite your partner.':'Sign in to open your shared little world.';$('#nameField').hidden=!signup;$('#authSubmit').textContent=signup?'Create account':'Sign in';$('#authToggle').textContent=signup?'I already have an account':'Create an account';$('#authPassword').autocomplete=signup?'new-password':'current-password';$('#authStatus').textContent='';};
+    $('#authSubmit').onclick=async()=>{const email=$('#authEmail').value.trim(),password=$('#authPassword').value,name=$('#authName').value.trim();if(!email||password.length<8){$('#authStatus').textContent='Enter a valid email and a password of at least 8 characters.';return;}$('#authSubmit').disabled=true;$('#authStatus').textContent=authMode==='signup'?'Creating your account…':'Signing in…';const result=authMode==='signup'?await supa.auth.signUp({email,password,options:{data:{display_name:name}}}):await supa.auth.signInWithPassword({email,password});$('#authSubmit').disabled=false;if(result.error){$('#authStatus').textContent=result.error.message;return;}if(!result.data.session){$('#authStatus').textContent='Check your email to confirm your account, then sign in.';return;}await loadUser(result.data.user);};
+    $('#createSpace').onclick=async()=>{$('#setupStatus').textContent='Creating your private space…';const {error}=await supa.rpc('create_couple',{space_name:$('#spaceName').value.trim()||'Our Little World'});if(error){$('#setupStatus').textContent=error.message;return;}await loadUser(currentUser);};
+    $('#joinSpace').onclick=async()=>{const code=$('#joinCode').value.trim();if(code.length!==8){$('#setupStatus').textContent='Enter the complete eight-character code.';return;}$('#setupStatus').textContent='Joining your partner…';const {error}=await supa.rpc('join_couple',{code});if(error){$('#setupStatus').textContent=error.message;return;}await loadUser(currentUser);};
+    async function signOut(){if(supa)await supa.auth.signOut();location.reload();}
+    $('#setupSignOut').onclick=signOut;$('#signOut').onclick=signOut;
+    $('#copyInvite').onclick=async()=>{try{await navigator.clipboard.writeText(coupleInfo.invite_code);toast('Invite code copied');}catch{prompt('Copy this invite code:',coupleInfo.invite_code)}};
+
+    const titles = {
+      home:['Your shared space','Good to see you'], calendar:['Cycle & wellness','Your calendar'], mood:['Emotional wellness','Mood check-in'], photos:['Moments that matter','Photo book'], together:['Your story in time','Together'], notes:['Words worth keeping','Notes']
+    };
+    $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => {
+      const id=btn.dataset.tab; $$('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn)); $$('.tab').forEach(t=>t.classList.toggle('active',t.id===id));
+      $('#pageEyebrow').textContent=titles[id][0]; $('#pageTitle').textContent=titles[id][1]; window.scrollTo({top:0,behavior:'smooth'});
+      if(id==='photos') renderPhotos(); if(id==='notes') renderNotes();
+    }));
+    $('#todayText').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+    $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+    $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape') $$('.modal.open').forEach(m=>closeModal(m.id));});
+
+    function durationParts() {
+      if(!data.relationshipStart) return null;
+      let ms=Math.max(0, Date.now()-new Date(data.relationshipStart).getTime());
+      const days=Math.floor(ms/86400000); ms%=86400000;
+      const hours=Math.floor(ms/3600000); ms%=3600000;
+      const minutes=Math.floor(ms/60000), seconds=Math.floor((ms%60000)/1000);
+      return {days,hours,minutes,seconds};
+    }
+    function durationHTML(d, includeSeconds=true){
+      if(!d) return '<div class="time-unit"><b>—</b><small>Add a start date</small></div>';
+      const units=[['days',d.days],['hours',d.hours],['minutes',d.minutes]]; if(includeSeconds)units.push(['seconds',d.seconds]);
+      return units.map(([n,v])=>`<div class="time-unit"><b>${v.toLocaleString()}</b><small>${n}</small></div>`).join('');
+    }
+    function updateClocks(){ const d=durationParts(); $('#homeDuration').innerHTML=durationHTML(d,false); $('#togetherDuration').innerHTML=durationHTML(d,true).replaceAll('time-unit','duration-box'); }
+    setInterval(updateClocks,1000);
+
+    function periodDates(){ return Object.keys(data.cycle).filter(k=>data.cycle[k]?.flow && data.cycle[k].flow!=='none').sort(); }
+    function periodPrediction(){
+      const dates=periodDates(); if(!dates.length) return null;
+      const starts=dates.filter((k,i)=>!i || (new Date(k)-new Date(dates[i-1]))/86400000>2);
+      let cycleLength=28;
+      if(starts.length>1){const gaps=starts.slice(1).map((s,i)=>(new Date(s)-new Date(starts[i]))/86400000).filter(n=>n>=18&&n<=45);if(gaps.length)cycleLength=Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length)}
+      const last=new Date(starts.at(-1)+'T12:00:00'); const next=new Date(last); next.setDate(next.getDate()+cycleLength); while(next<new Date()){next.setDate(next.getDate()+cycleLength)}
+      const cycleDay=Math.floor((new Date()-last)/86400000)+1; return {next,cycleDay,cycleLength};
+    }
+    async function refreshHome(){
+      $('#heroMessage').textContent=data.message || (data.names ? `${data.names}, your story keeps growing.` : 'Every day together is worth remembering.');
+      const pred=periodPrediction(); $('#nextPeriod').textContent=pred ? pred.next.toLocaleDateString(undefined,{month:'short',day:'numeric'}) : 'Add cycle dates'; $('#cycleDay').textContent=pred ? `Cycle day ${Math.max(1,pred.cycleDay)}` : 'Cycle not set';
+      const latest=data.moods[0]; $('#latestMood').textContent=latest ? `${latest.emoji} ${latest.mood[0].toUpperCase()+latest.mood.slice(1)}` : 'No check-in yet';
+      $('#noteCount').textContent=`${data.notes.length} ${data.notes.length===1?'note':'notes'}`;
+      try { const count=await photoDB.count();$('#photoCount').textContent=`${count} ${count===1?'memory':'memories'}`; } catch {}
+      renderFunHome();
+      updateClocks();
+    }
+
+    function renderFunHome(){
+      const seed=[...todayKey()].reduce((n,c)=>n+c.charCodeAt(0),0); $('#couplePrompt').textContent=couplePrompts[(seed+(data.promptOffset||0))%couplePrompts.length]; $('#loveCount').textContent=data.loveCount||0;
+      const d=durationParts();
+      if(!d){$('#milestoneTitle').textContent='Set your beginning';$('#milestoneText').textContent='Your countdown will appear here.';$('#milestoneProgress').style.width='0%';return;}
+      const next=Math.ceil((d.days+1)/100)*100, previous=Math.max(0,next-100), left=next-d.days;
+      $('#milestoneTitle').textContent=`${next.toLocaleString()} days together`;
+      $('#milestoneText').textContent=left===1?'Tomorrow!':`${left} days to go`;
+      $('#milestoneProgress').style.width=`${Math.min(100,Math.max(2,(d.days-previous)/100*100))}%`;
+    }
+    function celebrate(target, amount=18){
+      const r=target.getBoundingClientRect(), colors=['#b86473','#e0a0ac','#8d4352','#d7cfe0','#efc1a9'];
+      for(let i=0;i<amount;i++){const h=document.createElement('span');h.className='celebrate-heart';h.textContent=i%3?'♥':'✦';h.style.color=colors[i%colors.length];h.style.left=`${r.left+r.width/2}px`;h.style.top=`${r.top+r.height/2}px`;h.style.setProperty('--dx',`${(Math.random()-.5)*230}px`);h.style.setProperty('--dy',`${-45-Math.random()*170}px`);h.style.setProperty('--rot',`${(Math.random()-.5)*160}deg`);h.style.animationDelay=`${Math.random()*.12}s`;document.body.append(h);setTimeout(()=>h.remove(),1200);}
+    }
+    $('#newPrompt').onclick=()=>{data.promptOffset=(data.promptOffset||0)+1;persist();const p=$('#couplePrompt');p.classList.remove('saved-pop');void p.offsetWidth;p.classList.add('saved-pop');};
+    $('#loveBtn').onclick=e=>{data.loveCount=(data.loveCount||0)+1;persist();celebrate(e.currentTarget,14);};
+
+    let viewDate=new Date(), selectedDay=todayKey();
+    function renderCalendar(){
+      const y=viewDate.getFullYear(),m=viewDate.getMonth(); $('#monthTitle').textContent=new Date(y,m,1).toLocaleDateString(undefined,{month:'long',year:'numeric'});
+      const first=new Date(y,m,1), start=new Date(y,m,1-first.getDay()); let html='';
+      for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=localDateKey(d), entry=data.cycle[k]||{}, other=d.getMonth()!==m;
+        html+=`<button class="day ${other?'other ':''}${k===todayKey()?'today ':''}${k===selectedDay?'selected ':''}${entry.flow&&entry.flow!=='none'?'period ':''}" data-date="${k}"><span class="day-number">${d.getDate()}</span><span class="day-dots">${entry.mood?'<i class="dot"></i>':''}${entry.symptoms?.length?'<i class="dot"></i>':''}</span></button>`;}
+      $('#daysGrid').innerHTML=html; $$('.day',$('#daysGrid')).forEach(b=>b.addEventListener('click',()=>{selectedDay=b.dataset.date;loadDay();renderCalendar();})); loadDay();
+    }
+    function loadDay(){
+      const e=data.cycle[selectedDay]||{}; $('#selectedDateTitle').textContent=dateFmt(selectedDay); const pred=periodPrediction(); $('#cycleHint').textContent=pred?`avg. ${pred.cycleLength}-day cycle`:'';
+      $$('.flow').forEach(b=>b.classList.toggle('active',(e.flow||'none')===b.dataset.flow)); $$('#dayMoods .chip').forEach(b=>b.classList.toggle('active',e.mood===b.dataset.value)); $$('#symptoms .chip').forEach(b=>b.classList.toggle('active',e.symptoms?.includes(b.dataset.value))); $('#dayNote').value=e.note||'';
+    }
+    $('#prevMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()}; $('#nextMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()};
+    $$('.flow').forEach(b=>b.onclick=()=>$$('.flow').forEach(x=>x.classList.toggle('active',x===b))); $$('#dayMoods .chip').forEach(b=>b.onclick=()=>$$('#dayMoods .chip').forEach(x=>x.classList.toggle('active',x===b))); $$('#symptoms .chip').forEach(b=>b.onclick=()=>b.classList.toggle('active'));
+    $('#saveDay').onclick=()=>{ const flow=$('.flow.active')?.dataset.flow||'none', mood=$('#dayMoods .active')?.dataset.value||''; const symptoms=$$('#symptoms .active').map(b=>b.dataset.value),note=$('#dayNote').value.trim(); if(flow==='none'&&!mood&&!symptoms.length&&!note)delete data.cycle[selectedDay];else data.cycle[selectedDay]={flow,mood,symptoms,note};persist();renderCalendar();toast('Day saved'); };
+
+    let chosenMood={mood:'amazing',emoji:'🤩'};
+    $$('.mood-option').forEach(b=>b.onclick=()=>{chosenMood={mood:b.dataset.mood,emoji:b.dataset.emoji};$$('.mood-option').forEach(x=>x.classList.toggle('active',x===b));$('#bigMood').textContent=b.dataset.emoji;});
+    $('#energy').oninput=e=>$('#energyValue').textContent=e.target.value;
+    $('#saveMood').onclick=e=>{data.moods.unshift({id:crypto.randomUUID(),date:new Date().toISOString(),...chosenMood,energy:+$('#energy').value,note:$('#moodText').value.trim()});data.moods=data.moods.slice(0,100);$('#moodText').value='';persist();renderMoods();celebrate(e.currentTarget,12);toast('Check-in saved');};
+    function renderMoods(){
+      const recent=[...data.moods].slice(0,7).reverse();
+      $('#moodTrend').innerHTML=recent.length?recent.map((m,i)=>`<div class="trend-col" title="${esc(m.mood)} · Energy ${m.energy}/10"><span>${m.emoji}</span><div class="trend-bar" style="height:${Math.max(10,m.energy*7)}%;animation-delay:${i*.05}s"></div><small>${new Date(m.date).toLocaleDateString(undefined,{weekday:'short'}).slice(0,2)}</small></div>`).join(''):'<div class="empty" style="width:100%;padding:22px">Your energy trend will grow here.</div>';
+      $('#moodHistory').innerHTML=data.moods.length?data.moods.map(m=>`<div class="history-item"><span class="emoji">${m.emoji}</span><div><b>${esc(m.mood[0].toUpperCase()+m.mood.slice(1))} · Energy ${m.energy}/10</b><small>${new Date(m.date).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${m.note?' · '+esc(m.note):''}</small></div><span class="spacer"></span><button class="text-btn delete-mood" data-id="${m.id}" aria-label="Delete">×</button></div>`).join(''):'<div class="empty">Your mood timeline will appear here.</div>';
+      $$('.delete-mood').forEach(b=>b.onclick=()=>{data.moods=data.moods.filter(m=>m.id!==b.dataset.id);persist();renderMoods();});
+    }
+
+    const photoDB={
+      db:null, async init(){return new Promise((res,rej)=>{const q=indexedDB.open('OurLittleWorldPhotos',1);q.onupgradeneeded=()=>q.result.createObjectStore('photos',{keyPath:'id'});q.onsuccess=()=>{this.db=q.result;res()};q.onerror=()=>rej(q.error)})},
+      tx(mode='readonly'){return this.db.transaction('photos',mode).objectStore('photos')},
+      localAll(){return new Promise((res,rej)=>{const q=this.tx().getAll();q.onsuccess=()=>res(q.result.sort((a,b)=>b.created-a.created));q.onerror=()=>rej(q.error)})},
+      localCount(){return new Promise((res,rej)=>{const q=this.tx().count();q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})},
+      localPut(v){return new Promise((res,rej)=>{const q=this.tx('readwrite').put(v);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)})},
+      localDel(id){return new Promise((res,rej)=>{const q=this.tx('readwrite').delete(id);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)})},
+      async all(){if(!cloudReady)return this.localAll();const {data:rows,error}=await supa.from('photos').select('*').eq('couple_id',coupleId).order('created_at',{ascending:false});if(error)throw error;return Promise.all(rows.map(async row=>{const {data:signed,error:signError}=await supa.storage.from('couple-photos').createSignedUrl(row.storage_path,3600);if(signError)throw signError;return{id:row.id,data:signed.signedUrl,caption:row.caption,date:row.taken_on,created:new Date(row.created_at).getTime(),storagePath:row.storage_path}}));},
+      async count(){if(!cloudReady)return this.localCount();const {count,error}=await supa.from('photos').select('*',{count:'exact',head:true}).eq('couple_id',coupleId);if(error)throw error;return count||0;},
+      async put(v){if(!cloudReady)return this.localPut(v);const blob=await (await fetch(v.data)).blob();if(blob.size>25*1024*1024)throw Error('Photo exceeds the 25 MB limit');const ext=({'image/jpeg':'jpg','image/png':'png','image/gif':'gif','image/webp':'webp','image/heic':'heic','image/heif':'heif'})[blob.type]||'img',path=`${coupleId}/${v.id}.${ext}`;const {error:uploadError}=await supa.storage.from('couple-photos').upload(path,blob,{contentType:blob.type,upsert:false});if(uploadError)throw uploadError;const {error}=await supa.from('photos').insert({id:v.id,couple_id:coupleId,storage_path:path,caption:v.caption||'',taken_on:v.date||todayKey(),created_by:currentUser.id});if(error){await supa.storage.from('couple-photos').remove([path]);throw error;}},
+      async del(id){if(!cloudReady)return this.localDel(id);const {data:row,error:findError}=await supa.from('photos').select('storage_path').eq('id',id).single();if(findError)throw findError;const {error:storageError}=await supa.storage.from('couple-photos').remove([row.storage_path]);if(storageError)throw storageError;const {error}=await supa.from('photos').delete().eq('id',id);if(error)throw error;}
+    };
+    let pendingFiles=[],activePhoto=null;
+    async function renderPhotos(){
+      try{const photos=await photoDB.all();$('#photoGrid').innerHTML=photos.length?photos.map(p=>`<div class="photo" data-id="${p.id}"><img src="${p.data}" alt="${esc(p.caption||'Saved memory')}"><div class="photo-overlay">${esc(p.caption||dateFmt(p.date,{month:'short',day:'numeric',year:'numeric'}))}</div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">Your first favorite memory belongs here.</div>';$$('.photo').forEach(el=>el.onclick=()=>viewPhoto(el.dataset.id));refreshHome();}catch{ $('#photoGrid').innerHTML='<div class="empty" style="grid-column:1/-1">Photos are unavailable in this browser mode.</div>'; }
+    }
+    $('#surprisePhoto').onclick=async e=>{try{const photos=await photoDB.all();if(!photos.length)return toast('Add a photo first, then I can surprise you');const pick=photos[Math.floor(Math.random()*photos.length)];celebrate(e.currentTarget,10);viewPhoto(pick.id);}catch{toast('Photos are unavailable right now')}};
+    const zone=$('#uploadZone'); zone.onclick=()=>$('#photoInput').click();zone.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')$('#photoInput').click()};
+    ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag')}));['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag')}));zone.addEventListener('drop',e=>preparePhotos([...e.dataTransfer.files]));
+    $('#photoInput').onchange=e=>preparePhotos([...e.target.files]);
+    function preparePhotos(files){pendingFiles=files.filter(f=>f.type.startsWith('image/'));if(!pendingFiles.length)return toast('Please choose image files');$('#photoDate').value=todayKey();$('#photoCaption').value='';$('#photoQueueText').textContent=`${pendingFiles.length} ${pendingFiles.length===1?'photo':'photos'} ready to add`;openModal('photoModal');}
+    const fileData=file=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
+    $('#savePhotos').onclick=async()=>{if(!pendingFiles.length)return;$('#savePhotos').disabled=true;try{for(const file of pendingFiles)await photoDB.put({id:crypto.randomUUID(),data:await fileData(file),caption:$('#photoCaption').value.trim(),date:$('#photoDate').value||todayKey(),created:Date.now()+Math.random()});pendingFiles=[];closeModal('photoModal');$('#photoInput').value='';await renderPhotos();toast('Memory added');}catch{toast('Photo could not be saved—storage may be full')}finally{$('#savePhotos').disabled=false}};
+    async function viewPhoto(id){activePhoto=(await photoDB.all()).find(p=>p.id===id);if(!activePhoto)return;$('#viewerImage').src=activePhoto.data;$('#viewerTitle').textContent=activePhoto.caption||'A favorite memory';$('#viewerDate').textContent=dateFmt(activePhoto.date,{month:'long',day:'numeric',year:'numeric'});openModal('viewerModal');}
+    $('#deletePhoto').onclick=async()=>{if(!activePhoto||!confirm('Delete this photo from your private photo book?'))return;await photoDB.del(activePhoto.id);activePhoto=null;closeModal('viewerModal');renderPhotos();toast('Photo deleted');};
+
+    function loadTogether(){if(data.relationshipStart){const d=new Date(data.relationshipStart);$('#startDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);$('#sinceText').textContent=`Together since ${d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})}`;}else{$('#startDate').value='';$('#sinceText').textContent='Add your beginning below';}$('#coupleNames').value=data.names||'';$('#relationshipMessage').value=data.message||'';updateClocks();}
+    $('#saveStart').onclick=e=>{const value=$('#startDate').value;if(!value)return toast('Choose your start date and time');if(new Date(value)>new Date())return toast('The start date cannot be in the future');data.relationshipStart=new Date(value).toISOString();persist();loadTogether();celebrate(e.currentTarget,24);toast('Your beginning is saved');};
+    $('#setManual').onclick=()=>{const days=Math.max(0,+$('#manualDays').value||0),hours=Math.max(0,Math.min(23,+$('#manualHours').value||0)),minutes=Math.max(0,Math.min(59,+$('#manualMinutes').value||0));if(!days&&!hours&&!minutes)return toast('Enter an elapsed time');data.relationshipStart=new Date(Date.now()-((days*24+hours)*60+minutes)*60000).toISOString();persist();loadTogether();toast('Elapsed time is now counting live');};
+    $('#saveProfile').onclick=()=>{data.names=$('#coupleNames').value.trim();data.message=$('#relationshipMessage').value.trim();persist();toast('Home updated');};
+
+    function renderNotes(filter=''){const q=filter.toLowerCase();const notes=data.notes.filter(n=>(n.title+' '+n.body).toLowerCase().includes(q));$('#notesGrid').innerHTML=notes.length?notes.map(n=>`<article class="note"><h3>${esc(n.title||'Untitled note')}</h3><p>${esc(n.body)}</p><footer><span>${new Date(n.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</span><button class="delete-note" data-id="${n.id}">Delete</button></footer></article>`).join(''):`<div class="empty" style="grid-column:1/-1">${filter?'No matching notes.':'Your first note can be anything at all.'}</div>`;$$('.delete-note').forEach(b=>b.onclick=()=>{if(confirm('Delete this note?')){data.notes=data.notes.filter(n=>n.id!==b.dataset.id);persist();renderNotes($('#noteSearch').value)}});}
+    $('#newNote').onclick=()=>{$('#noteTitle').value='';$('#noteBody').value='';openModal('noteModal');setTimeout(()=>$('#noteTitle').focus(),50)};$('#saveNote').onclick=()=>{const title=$('#noteTitle').value.trim(),body=$('#noteBody').value.trim();if(!title&&!body)return toast('Write something first');data.notes.unshift({id:crypto.randomUUID(),title,body,date:new Date().toISOString()});persist();closeModal('noteModal');renderNotes();toast('Note saved');};$('#noteSearch').oninput=e=>renderNotes(e.target.value);
+
+    $('#exportBtn').onclick=async()=>{let photos=[];try{photos=await photoDB.all();if(cloudReady)photos=await Promise.all(photos.map(async p=>({...p,data:await fileData(await (await fetch(p.data)).blob())})));}catch{}const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data,photos},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`our-little-world-${todayKey()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup downloaded');};
+    $('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const backup=JSON.parse(await f.text());if(!backup.data)throw Error();if(!confirm('Importing will replace your current calendar, moods, relationship, and notes. Continue?'))return;data={...defaultData,...backup.data};persist();for(const p of backup.photos||[])await photoDB.put(p);renderAll();toast('Backup restored');}catch{toast('That backup file could not be read')}finally{e.target.value=''}};
+
+    function renderAll(){renderCalendar();renderMoods();renderNotes();loadTogether();renderPhotos();refreshHome();}
+    photoDB.init().then(initCloud).catch(initCloud);
+  })();
+  </script>
+</body>
+</html>
