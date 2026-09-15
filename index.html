@@ -209,6 +209,19 @@
     .invite-code { display:block; font:600 24px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace; letter-spacing:.12em; color:var(--rose-deep); margin-top:3px; }
     .cloud-share { margin-top:18px; background:linear-gradient(145deg,#f8e9e5,#eee9f2); }
     .cloud-share p { color:var(--muted); line-height:1.5; font-size:13px; }
+    .author-line { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:11px; }
+    .author-avatar { flex:0 0 25px; width:25px; height:25px; display:grid; place-items:center; border-radius:9px; color:#7e4551; background:#efd6da; font-size:10px; font-weight:800; text-transform:uppercase; }
+    .author-avatar.partner { color:#5e5571; background:#e3dceb; }
+    .note-author { display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:18px; font-size:11px; color:#73666a; }
+    .note-author + footer { margin-top:0; padding-top:9px; }
+    .entry-author { margin:-10px 0 13px; min-height:17px; color:var(--muted); font-size:11px; }
+    .activity-feed { display:grid; gap:9px; }
+    .activity-item { display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:14px; background:rgba(255,255,255,.52); }
+    .activity-copy { min-width:0; flex:1; }
+    .activity-copy b { display:block; font-size:12px; font-weight:700; }
+    .activity-copy small { display:block; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .activity-time { flex:0 0 auto; color:var(--muted); font-size:9px; }
+    .profile-row { display:grid; grid-template-columns:1fr auto; gap:9px; align-items:end; margin-top:17px; }
     @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
     @media (max-width:1000px) { .photo-grid{grid-template-columns:repeat(3,1fr)} .notes-grid{grid-template-columns:repeat(2,1fr)} .calendar-wrap{grid-template-columns:1fr} }
     @media (max-width:760px) {
@@ -292,6 +305,10 @@
           </article>
         </div>
         <article class="card" style="margin-top:18px">
+          <div class="card-title"><h2>Recent shared activity</h2><span>Who did what</span></div>
+          <div class="activity-feed" id="activityFeed"></div>
+        </article>
+        <article class="card" style="margin-top:18px">
           <div class="card-title"><h2>Keep your world safe</h2><span>Private by design</span></div>
           <p class="section-lead" style="margin-top:0">Everything is stored only in this browser. Save a backup if you plan to clear browser data or move devices.</p>
           <div class="actions"><button class="primary" id="exportBtn">Export backup</button><button class="ghost" id="importBtn">Import backup</button><input type="file" id="importFile" accept="application/json" hidden></div>
@@ -308,6 +325,7 @@
           </article>
           <article class="card" id="dayEditor">
             <div class="card-title"><h3 id="selectedDateTitle">Today</h3><span id="cycleHint"></span></div>
+            <div class="entry-author" id="dayAuthor">No entry yet</div>
             <div class="choice-title">Period flow</div>
             <div class="flow-options" id="flowOptions"><button class="flow" data-flow="none">None</button><button class="flow" data-flow="light">Light</button><button class="flow" data-flow="medium">Medium</button><button class="flow" data-flow="heavy">Heavy</button></div>
             <div class="choice-title">Mood</div><div class="chips" id="dayMoods"><button class="chip" data-value="happy">😊 Happy</button><button class="chip" data-value="calm">😌 Calm</button><button class="chip" data-value="low">😔 Low</button><button class="chip" data-value="sensitive">🥺 Sensitive</button><button class="chip" data-value="irritable">😤 Irritable</button></div>
@@ -365,6 +383,7 @@
           <div class="card-title"><h2>Share with your partner</h2><span id="memberStatus">Private cloud</span></div>
           <p>Your partner creates their own account, then joins using this code. Only the two members of this space can access its records and photos.</p>
           <div class="data-box"><div><small>Invite code</small><b class="invite-code" id="inviteCode">••••••••</b></div><div class="actions"><button class="primary" id="copyInvite">Copy code</button><button class="ghost" id="signOut">Sign out</button></div></div>
+          <div class="profile-row"><div><label for="displayName">Your display name</label><input id="displayName" maxlength="40" placeholder="How your partner sees you"></div><button class="ghost" id="saveDisplayName">Save name</button></div>
           <small id="accountEmail" style="display:block;color:var(--muted);margin-top:12px"></small>
         </article>
       </section>
@@ -392,11 +411,11 @@
     const todayKey = () => localDateKey(new Date());
     const localDateKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const esc = s => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    const defaultData = { relationshipStart:null, names:'', message:'', cycle:{}, moods:[], notes:[], loveCount:0, promptOffset:0 };
-    let supa=null, currentUser=null, coupleId=null, coupleInfo=null, cloudReady=false, syncTimer=null, realtimeChannel=null;
+    const defaultData = { relationshipStart:null, names:'', message:'', cycle:{}, moods:[], notes:[], activity:[], loveCount:0, promptOffset:0 };
+    let supa=null, currentUser=null, currentProfileName='', coupleId=null, coupleInfo=null, cloudReady=false, syncTimer=null, realtimeChannel=null;
     let data;
     try { data = {...defaultData, ...JSON.parse(localStorage.getItem(STORE) || '{}')}; } catch { data = structuredClone(defaultData); }
-    data.cycle ||= {}; data.moods ||= []; data.notes ||= [];
+    data.cycle ||= {}; data.moods ||= []; data.notes ||= []; data.activity ||= [];
     const persist = () => { localStorage.setItem(STORE, JSON.stringify(data)); refreshHome(); if(cloudReady){setSync('Saving…',false);clearTimeout(syncTimer);syncTimer=setTimeout(saveCloudState,450);} };
     const toast = msg => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),2300); };
     const openModal = id => $('#'+id).classList.add('open');
@@ -419,7 +438,7 @@
 
     const showPane=id=>$$('.auth-pane').forEach(p=>p.classList.toggle('active',p.id===id));
     const setSync=(message,online=true)=>{ $('#syncStatus').textContent=message; $('#syncPill').classList.toggle('online',online); };
-    function normalizeState(value){const v={...defaultData,...(value||{})};v.cycle||={};v.moods||=[];v.notes||=[];return v;}
+    function normalizeState(value){const v={...defaultData,...(value||{})};v.cycle||={};v.moods||=[];v.notes||=[];v.activity||=[];return v;}
     function hasMeaningfulData(v){return !!(v.relationshipStart||v.names||v.message||Object.keys(v.cycle||{}).length||(v.moods||[]).length||(v.notes||[]).length||v.loveCount);}
     async function saveCloudState(){
       if(!cloudReady||!coupleId)return;
@@ -434,7 +453,7 @@
       if(session)await loadUser(session.user);else showPane('authPane');
     }
     async function loadUser(user){
-      currentUser=user;setSync('Connecting…',false);
+      currentUser=user;currentProfileName=user.user_metadata?.display_name?.trim()||user.email?.split('@')[0]||'Partner';$('#displayName').value=currentProfileName;setSync('Connecting…',false);
       const {data:membership,error}=await supa.from('couple_members').select('couple_id,role').eq('user_id',user.id).maybeSingle();
       if(error){$('#authStatus').textContent=error.message;showPane('authPane');return;}
       if(!membership){showPane('setupPane');return;}
@@ -470,6 +489,12 @@
     async function signOut(){if(supa)await supa.auth.signOut();location.reload();}
     $('#setupSignOut').onclick=signOut;$('#signOut').onclick=signOut;
     $('#copyInvite').onclick=async()=>{try{await navigator.clipboard.writeText(coupleInfo.invite_code);toast('Invite code copied');}catch{prompt('Copy this invite code:',coupleInfo.invite_code)}};
+    $('#saveDisplayName').onclick=async()=>{const name=$('#displayName').value.trim();if(!name)return toast('Enter a display name');const {error}=await supa.auth.updateUser({data:{display_name:name}});if(error)return toast(error.message);currentProfileName=name;await supa.from('profiles').update({display_name:name}).eq('id',currentUser.id);recordActivity('updated their display name',name);persist();renderAll();toast('Display name saved');};
+
+    function authorIdentity(){return{authorId:currentUser?.id||'local',authorName:currentProfileName||currentUser?.email?.split('@')[0]||'Partner'};}
+    function authorMeta(item){const name=item?.authorName||'Earlier entry',mine=!!(item?.authorId&&item.authorId===currentUser?.id);return{name,label:mine?`${name} (you)`:name,initial:name==='Earlier entry'?'?':name.charAt(0),mine};}
+    function recordActivity(action,detail=''){const who=authorIdentity();data.activity||=[];data.activity.unshift({id:crypto.randomUUID(),...who,action,detail,date:new Date().toISOString()});data.activity=data.activity.slice(0,40);}
+    function renderActivity(){const feed=$('#activityFeed'),items=data.activity||[];feed.innerHTML=items.length?items.slice(0,8).map(item=>{const a=authorMeta(item);return`<div class="activity-item"><span class="author-avatar ${a.mine?'':'partner'}">${esc(a.initial)}</span><div class="activity-copy"><b>${esc(a.label)} ${esc(item.action)}</b>${item.detail?`<small>${esc(item.detail)}</small>`:''}</div><span class="activity-time">${new Date(item.date).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span></div>`}).join(''):'<div class="empty">New notes, moods, and updates from both of you will appear here.</div>';}
 
     const titles = {
       home:['Your shared space','Good to see you'], calendar:['Cycle & wellness','Your calendar'], mood:['Emotional wellness','Mood check-in'], photos:['Moments that matter','Photo book'], together:['Your story in time','Together'], notes:['Words worth keeping','Notes']
@@ -515,7 +540,7 @@
       const latest=data.moods[0]; $('#latestMood').textContent=latest ? `${latest.emoji} ${latest.mood[0].toUpperCase()+latest.mood.slice(1)}` : 'No check-in yet';
       $('#noteCount').textContent=`${data.notes.length} ${data.notes.length===1?'note':'notes'}`;
       try { const count=await photoDB.count();$('#photoCount').textContent=`${count} ${count===1?'memory':'memories'}`; } catch {}
-      renderFunHome();
+      renderFunHome();renderActivity();
       updateClocks();
     }
 
@@ -545,21 +570,22 @@
     }
     function loadDay(){
       const e=data.cycle[selectedDay]||{}; $('#selectedDateTitle').textContent=dateFmt(selectedDay); const pred=periodPrediction(); $('#cycleHint').textContent=pred?`avg. ${pred.cycleLength}-day cycle`:'';
+      const a=authorMeta(e);$('#dayAuthor').textContent=e.authorName?`Last updated by ${a.label}${e.updatedAt?' · '+new Date(e.updatedAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}`:'No entry yet';
       $$('.flow').forEach(b=>b.classList.toggle('active',(e.flow||'none')===b.dataset.flow)); $$('#dayMoods .chip').forEach(b=>b.classList.toggle('active',e.mood===b.dataset.value)); $$('#symptoms .chip').forEach(b=>b.classList.toggle('active',e.symptoms?.includes(b.dataset.value))); $('#dayNote').value=e.note||'';
     }
     $('#prevMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()}; $('#nextMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()};
     $$('.flow').forEach(b=>b.onclick=()=>$$('.flow').forEach(x=>x.classList.toggle('active',x===b))); $$('#dayMoods .chip').forEach(b=>b.onclick=()=>$$('#dayMoods .chip').forEach(x=>x.classList.toggle('active',x===b))); $$('#symptoms .chip').forEach(b=>b.onclick=()=>b.classList.toggle('active'));
-    $('#saveDay').onclick=()=>{ const flow=$('.flow.active')?.dataset.flow||'none', mood=$('#dayMoods .active')?.dataset.value||''; const symptoms=$$('#symptoms .active').map(b=>b.dataset.value),note=$('#dayNote').value.trim(); if(flow==='none'&&!mood&&!symptoms.length&&!note)delete data.cycle[selectedDay];else data.cycle[selectedDay]={flow,mood,symptoms,note};persist();renderCalendar();toast('Day saved'); };
+    $('#saveDay').onclick=()=>{ const flow=$('.flow.active')?.dataset.flow||'none', mood=$('#dayMoods .active')?.dataset.value||''; const symptoms=$$('#symptoms .active').map(b=>b.dataset.value),note=$('#dayNote').value.trim(); if(flow==='none'&&!mood&&!symptoms.length&&!note){delete data.cycle[selectedDay];recordActivity('cleared a calendar entry',dateFmt(selectedDay));}else{data.cycle[selectedDay]={flow,mood,symptoms,note,...authorIdentity(),updatedAt:new Date().toISOString()};recordActivity('updated the calendar',dateFmt(selectedDay));}persist();renderCalendar();toast('Day saved'); };
 
     let chosenMood={mood:'amazing',emoji:'🤩'};
     $$('.mood-option').forEach(b=>b.onclick=()=>{chosenMood={mood:b.dataset.mood,emoji:b.dataset.emoji};$$('.mood-option').forEach(x=>x.classList.toggle('active',x===b));$('#bigMood').textContent=b.dataset.emoji;});
     $('#energy').oninput=e=>$('#energyValue').textContent=e.target.value;
-    $('#saveMood').onclick=e=>{data.moods.unshift({id:crypto.randomUUID(),date:new Date().toISOString(),...chosenMood,energy:+$('#energy').value,note:$('#moodText').value.trim()});data.moods=data.moods.slice(0,100);$('#moodText').value='';persist();renderMoods();celebrate(e.currentTarget,12);toast('Check-in saved');};
+    $('#saveMood').onclick=e=>{data.moods.unshift({id:crypto.randomUUID(),date:new Date().toISOString(),...chosenMood,energy:+$('#energy').value,note:$('#moodText').value.trim(),...authorIdentity()});data.moods=data.moods.slice(0,100);recordActivity('added a mood check-in',`${chosenMood.emoji} ${chosenMood.mood}`);$('#moodText').value='';persist();renderMoods();celebrate(e.currentTarget,12);toast('Check-in saved');};
     function renderMoods(){
       const recent=[...data.moods].slice(0,7).reverse();
       $('#moodTrend').innerHTML=recent.length?recent.map((m,i)=>`<div class="trend-col" title="${esc(m.mood)} · Energy ${m.energy}/10"><span>${m.emoji}</span><div class="trend-bar" style="height:${Math.max(10,m.energy*7)}%;animation-delay:${i*.05}s"></div><small>${new Date(m.date).toLocaleDateString(undefined,{weekday:'short'}).slice(0,2)}</small></div>`).join(''):'<div class="empty" style="width:100%;padding:22px">Your energy trend will grow here.</div>';
-      $('#moodHistory').innerHTML=data.moods.length?data.moods.map(m=>`<div class="history-item"><span class="emoji">${m.emoji}</span><div><b>${esc(m.mood[0].toUpperCase()+m.mood.slice(1))} · Energy ${m.energy}/10</b><small>${new Date(m.date).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${m.note?' · '+esc(m.note):''}</small></div><span class="spacer"></span><button class="text-btn delete-mood" data-id="${m.id}" aria-label="Delete">×</button></div>`).join(''):'<div class="empty">Your mood timeline will appear here.</div>';
-      $$('.delete-mood').forEach(b=>b.onclick=()=>{data.moods=data.moods.filter(m=>m.id!==b.dataset.id);persist();renderMoods();});
+      $('#moodHistory').innerHTML=data.moods.length?data.moods.map(m=>{const a=authorMeta(m);return`<div class="history-item"><span class="emoji">${m.emoji}</span><div><b>${esc(m.mood[0].toUpperCase()+m.mood.slice(1))} · Energy ${m.energy}/10</b><small>By ${esc(a.label)} · ${new Date(m.date).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${m.note?' · '+esc(m.note):''}</small></div><span class="spacer"></span><button class="text-btn delete-mood" data-id="${m.id}" aria-label="Delete">×</button></div>`}).join(''):'<div class="empty">Your mood timeline will appear here.</div>';
+      $$('.delete-mood').forEach(b=>b.onclick=()=>{const removed=data.moods.find(m=>m.id===b.dataset.id);data.moods=data.moods.filter(m=>m.id!==b.dataset.id);recordActivity('deleted a mood check-in',removed?.mood||'');persist();renderMoods();});
     }
 
     const photoDB={
@@ -584,22 +610,22 @@
     $('#photoInput').onchange=e=>preparePhotos([...e.target.files]);
     function preparePhotos(files){pendingFiles=files.filter(f=>f.type.startsWith('image/'));if(!pendingFiles.length)return toast('Please choose image files');$('#photoDate').value=todayKey();$('#photoCaption').value='';$('#photoQueueText').textContent=`${pendingFiles.length} ${pendingFiles.length===1?'photo':'photos'} ready to add`;openModal('photoModal');}
     const fileData=file=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});
-    $('#savePhotos').onclick=async()=>{if(!pendingFiles.length)return;$('#savePhotos').disabled=true;try{for(const file of pendingFiles)await photoDB.put({id:crypto.randomUUID(),data:await fileData(file),caption:$('#photoCaption').value.trim(),date:$('#photoDate').value||todayKey(),created:Date.now()+Math.random()});pendingFiles=[];closeModal('photoModal');$('#photoInput').value='';await renderPhotos();toast('Memory added');}catch{toast('Photo could not be saved—storage may be full')}finally{$('#savePhotos').disabled=false}};
+    $('#savePhotos').onclick=async()=>{if(!pendingFiles.length)return;$('#savePhotos').disabled=true;try{const amount=pendingFiles.length,caption=$('#photoCaption').value.trim();for(const file of pendingFiles)await photoDB.put({id:crypto.randomUUID(),data:await fileData(file),caption,date:$('#photoDate').value||todayKey(),created:Date.now()+Math.random()});recordActivity(`added ${amount===1?'a photo':amount+' photos'}`,caption||'A new memory');persist();pendingFiles=[];closeModal('photoModal');$('#photoInput').value='';await renderPhotos();toast('Memory added');}catch{toast('Photo could not be saved—storage may be full')}finally{$('#savePhotos').disabled=false}};
     async function viewPhoto(id){activePhoto=(await photoDB.all()).find(p=>p.id===id);if(!activePhoto)return;$('#viewerImage').src=activePhoto.data;$('#viewerTitle').textContent=activePhoto.caption||'A favorite memory';$('#viewerDate').textContent=dateFmt(activePhoto.date,{month:'long',day:'numeric',year:'numeric'});openModal('viewerModal');}
-    $('#deletePhoto').onclick=async()=>{if(!activePhoto||!confirm('Delete this photo from your private photo book?'))return;await photoDB.del(activePhoto.id);activePhoto=null;closeModal('viewerModal');renderPhotos();toast('Photo deleted');};
+    $('#deletePhoto').onclick=async()=>{if(!activePhoto||!confirm('Delete this photo from your private photo book?'))return;const caption=activePhoto.caption;await photoDB.del(activePhoto.id);recordActivity('deleted a photo',caption||'A memory');persist();activePhoto=null;closeModal('viewerModal');renderPhotos();toast('Photo deleted');};
 
     function loadTogether(){if(data.relationshipStart){const d=new Date(data.relationshipStart);$('#startDate').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);$('#sinceText').textContent=`Together since ${d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})}`;}else{$('#startDate').value='';$('#sinceText').textContent='Add your beginning below';}$('#coupleNames').value=data.names||'';$('#relationshipMessage').value=data.message||'';updateClocks();}
-    $('#saveStart').onclick=e=>{const value=$('#startDate').value;if(!value)return toast('Choose your start date and time');if(new Date(value)>new Date())return toast('The start date cannot be in the future');data.relationshipStart=new Date(value).toISOString();persist();loadTogether();celebrate(e.currentTarget,24);toast('Your beginning is saved');};
-    $('#setManual').onclick=()=>{const days=Math.max(0,+$('#manualDays').value||0),hours=Math.max(0,Math.min(23,+$('#manualHours').value||0)),minutes=Math.max(0,Math.min(59,+$('#manualMinutes').value||0));if(!days&&!hours&&!minutes)return toast('Enter an elapsed time');data.relationshipStart=new Date(Date.now()-((days*24+hours)*60+minutes)*60000).toISOString();persist();loadTogether();toast('Elapsed time is now counting live');};
-    $('#saveProfile').onclick=()=>{data.names=$('#coupleNames').value.trim();data.message=$('#relationshipMessage').value.trim();persist();toast('Home updated');};
+    $('#saveStart').onclick=e=>{const value=$('#startDate').value;if(!value)return toast('Choose your start date and time');if(new Date(value)>new Date())return toast('The start date cannot be in the future');data.relationshipStart=new Date(value).toISOString();recordActivity('updated your relationship start date',new Date(value).toLocaleDateString());persist();loadTogether();celebrate(e.currentTarget,24);toast('Your beginning is saved');};
+    $('#setManual').onclick=()=>{const days=Math.max(0,+$('#manualDays').value||0),hours=Math.max(0,Math.min(23,+$('#manualHours').value||0)),minutes=Math.max(0,Math.min(59,+$('#manualMinutes').value||0));if(!days&&!hours&&!minutes)return toast('Enter an elapsed time');data.relationshipStart=new Date(Date.now()-((days*24+hours)*60+minutes)*60000).toISOString();recordActivity('updated your time together',`${days} days, ${hours} hours, ${minutes} minutes`);persist();loadTogether();toast('Elapsed time is now counting live');};
+    $('#saveProfile').onclick=()=>{data.names=$('#coupleNames').value.trim();data.message=$('#relationshipMessage').value.trim();recordActivity('updated your couple profile',data.names||'Our Little World');persist();toast('Home updated');};
 
-    function renderNotes(filter=''){const q=filter.toLowerCase();const notes=data.notes.filter(n=>(n.title+' '+n.body).toLowerCase().includes(q));$('#notesGrid').innerHTML=notes.length?notes.map(n=>`<article class="note"><h3>${esc(n.title||'Untitled note')}</h3><p>${esc(n.body)}</p><footer><span>${new Date(n.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</span><button class="delete-note" data-id="${n.id}">Delete</button></footer></article>`).join(''):`<div class="empty" style="grid-column:1/-1">${filter?'No matching notes.':'Your first note can be anything at all.'}</div>`;$$('.delete-note').forEach(b=>b.onclick=()=>{if(confirm('Delete this note?')){data.notes=data.notes.filter(n=>n.id!==b.dataset.id);persist();renderNotes($('#noteSearch').value)}});}
-    $('#newNote').onclick=()=>{$('#noteTitle').value='';$('#noteBody').value='';openModal('noteModal');setTimeout(()=>$('#noteTitle').focus(),50)};$('#saveNote').onclick=()=>{const title=$('#noteTitle').value.trim(),body=$('#noteBody').value.trim();if(!title&&!body)return toast('Write something first');data.notes.unshift({id:crypto.randomUUID(),title,body,date:new Date().toISOString()});persist();closeModal('noteModal');renderNotes();toast('Note saved');};$('#noteSearch').oninput=e=>renderNotes(e.target.value);
+    function renderNotes(filter=''){const q=filter.toLowerCase();const notes=data.notes.filter(n=>(n.title+' '+n.body+' '+(n.authorName||'')).toLowerCase().includes(q));$('#notesGrid').innerHTML=notes.length?notes.map(n=>{const a=authorMeta(n);return`<article class="note"><h3>${esc(n.title||'Untitled note')}</h3><p>${esc(n.body)}</p><div class="note-author"><span class="author-avatar ${a.mine?'':'partner'}">${esc(a.initial)}</span><span>Written by <b>${esc(a.label)}</b></span></div><footer><span>${new Date(n.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</span><button class="delete-note" data-id="${n.id}">Delete</button></footer></article>`}).join(''):`<div class="empty" style="grid-column:1/-1">${filter?'No matching notes.':'Your first note can be anything at all.'}</div>`;$$('.delete-note').forEach(b=>b.onclick=()=>{if(confirm('Delete this note?')){const removed=data.notes.find(n=>n.id===b.dataset.id);data.notes=data.notes.filter(n=>n.id!==b.dataset.id);recordActivity('deleted a note',removed?.title||'Untitled note');persist();renderNotes($('#noteSearch').value)}});}
+    $('#newNote').onclick=()=>{$('#noteTitle').value='';$('#noteBody').value='';openModal('noteModal');setTimeout(()=>$('#noteTitle').focus(),50)};$('#saveNote').onclick=()=>{const title=$('#noteTitle').value.trim(),body=$('#noteBody').value.trim();if(!title&&!body)return toast('Write something first');data.notes.unshift({id:crypto.randomUUID(),title,body,date:new Date().toISOString(),...authorIdentity()});recordActivity('added a note',title||'Untitled note');persist();closeModal('noteModal');renderNotes();toast('Note saved');};$('#noteSearch').oninput=e=>renderNotes(e.target.value);
 
     $('#exportBtn').onclick=async()=>{let photos=[];try{photos=await photoDB.all();if(cloudReady)photos=await Promise.all(photos.map(async p=>({...p,data:await fileData(await (await fetch(p.data)).blob())})));}catch{}const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data,photos},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`our-little-world-${todayKey()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup downloaded');};
     $('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const backup=JSON.parse(await f.text());if(!backup.data)throw Error();if(!confirm('Importing will replace your current calendar, moods, relationship, and notes. Continue?'))return;data={...defaultData,...backup.data};persist();for(const p of backup.photos||[])await photoDB.put(p);renderAll();toast('Backup restored');}catch{toast('That backup file could not be read')}finally{e.target.value=''}};
 
-    function renderAll(){renderCalendar();renderMoods();renderNotes();loadTogether();renderPhotos();refreshHome();}
+    function renderAll(){renderCalendar();renderMoods();renderNotes();renderActivity();loadTogether();renderPhotos();refreshHome();}
     photoDB.init().then(initCloud).catch(initCloud);
   })();
   </script>
