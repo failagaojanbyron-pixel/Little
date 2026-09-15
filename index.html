@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f7f1eb">
   <title>Our Little World</title>
+  <script>
+    (()=>{const mode=localStorage.getItem('ourLittleWorld.theme')||'auto',hour=new Date().getHours();document.documentElement.dataset.theme=mode==='auto'?(hour>=7&&hour<19?'light':'dark'):mode;document.documentElement.dataset.themeMode=mode;})();
+  </script>
   <style>
     :root {
       --bg: #f7f1eb;
@@ -222,12 +225,53 @@
     .activity-copy small { display:block; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .activity-time { flex:0 0 auto; color:var(--muted); font-size:9px; }
     .profile-row { display:grid; grid-template-columns:1fr auto; gap:9px; align-items:end; margin-top:17px; }
+    .theme-toggle { height:39px; border:1px solid rgba(255,255,255,.82); border-radius:99px; padding:0 13px; display:flex; align-items:center; gap:7px; cursor:pointer; color:var(--muted); background:rgba(255,255,255,.72); box-shadow:0 8px 28px rgba(72,53,57,.06); transition:.2s ease; }
+    .theme-toggle:hover { transform:translateY(-1px); color:var(--ink); }
+    .theme-icon { width:18px; font-size:15px; text-align:center; }
+    .theme-label { font-size:11px; font-weight:700; }
+    html[data-theme="dark"] { color-scheme:dark; --bg:#181416; --paper:rgba(42,34,37,.88); --paper-solid:#2c2427; --ink:#f4ebea; --muted:#b8a8ab; --rose:#d47f90; --rose-deep:#f0a5b2; --blush:#503039; --peach:#4b352e; --sage:#39463a; --lavender:#41384a; --line:rgba(255,255,255,.1); --shadow:0 20px 60px rgba(0,0,0,.28); }
+    html[data-theme="dark"] body { background:radial-gradient(circle at 8% 5%,rgba(109,49,61,.35),transparent 31rem),radial-gradient(circle at 95% 92%,rgba(74,61,94,.32),transparent 33rem),var(--bg); }
+    html[data-theme="dark"] .sidebar { background:rgba(29,23,26,.8); border-color:rgba(255,255,255,.05); }
+    html[data-theme="dark"] .nav-btn { color:#c3b5b8; }
+    html[data-theme="dark"] .nav-btn:hover,html[data-theme="dark"] .nav-btn.active { background:#33292d; color:#f1a8b5; }
+    html[data-theme="dark"] .side-quote { background:linear-gradient(145deg,#3d292e,#332b2d); color:#dfbcc2; }
+    html[data-theme="dark"] .today-pill,html[data-theme="dark"] .sync-pill,html[data-theme="dark"] .theme-toggle { background:rgba(44,36,39,.9); border-color:rgba(255,255,255,.06); }
+    html[data-theme="dark"] .card { border-color:rgba(255,255,255,.06); }
+    html[data-theme="dark"] .card:not(.hero):hover { box-shadow:0 24px 65px rgba(0,0,0,.38); }
+    html[data-theme="dark"] .quick-stat .pink { background:#503039; }html[data-theme="dark"] .quick-stat .sage { background:#39463a; }html[data-theme="dark"] .quick-stat .lav { background:#41384a; }
+    html[data-theme="dark"] .ghost,html[data-theme="dark"] .round-btn,html[data-theme="dark"] .close { background:#3a3033; color:#d9ccce; }
+    html[data-theme="dark"] .ghost:hover { background:#473a3e; }
+    html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select { background:rgba(23,18,20,.72); color:var(--ink); }
+    html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder { color:#86777b; }
+    html[data-theme="dark"] .day:hover { background:#382d31; }
+    html[data-theme="dark"] .day.period:not(.selected) { background:#54313a; color:#f1b1bc; }
+    html[data-theme="dark"] .chip { background:#382f31; }html[data-theme="dark"] .chip.active { background:#55333b; border-color:#895463; color:#ffc2cc; }
+    html[data-theme="dark"] .flow { background:rgba(25,20,22,.6); }
+    html[data-theme="dark"] .upload-zone { background:rgba(25,20,22,.38); border-color:#62474e; }
+    html[data-theme="dark"] .upload-zone.drag { background:#482c33; }
+    html[data-theme="dark"] .photo { background:#382e31; }
+    html[data-theme="dark"] .mood-face,html[data-theme="dark"] .mood-option.active { background:#4d3732; border-color:#755047; }
+    html[data-theme="dark"] .mood-option,html[data-theme="dark"] .history-item,html[data-theme="dark"] .activity-item { background:rgba(24,19,21,.48); }
+    html[data-theme="dark"] .together-display { background:linear-gradient(145deg,#493035,#3a302c); }
+    html[data-theme="dark"] .duration-box { background:rgba(24,19,21,.52); }
+    html[data-theme="dark"] .note { background:#49342e; }html[data-theme="dark"] .note:nth-child(3n+2){background:#3d3748}html[data-theme="dark"] .note:nth-child(3n+3){background:#374035}
+    html[data-theme="dark"] .note p,html[data-theme="dark"] .note-author { color:#d4c5c7; }
+    html[data-theme="dark"] .modal { background:rgba(10,7,8,.72); }
+    html[data-theme="dark"] .prompt-card { background:linear-gradient(145deg,#3c2c2f,#462d33); }
+    html[data-theme="dark"] .milestone { background:linear-gradient(145deg,#393341,#302a2c); }
+    html[data-theme="dark"] .progress-track { background:rgba(15,12,13,.6); }
+    html[data-theme="dark"] .cloud-share { background:linear-gradient(145deg,#422e31,#35303d); }
+    html[data-theme="dark"] .data-box { background:rgba(20,16,18,.24); }
+    html[data-theme="dark"] .empty { border-color:#514348; }
+    html[data-theme="dark"] .author-avatar { background:#58343d; color:#ffc0cb; }html[data-theme="dark"] .author-avatar.partner { background:#463d52; color:#dcd0ef; }
+    html[data-theme="dark"] .auth-screen { background:radial-gradient(circle at 15% 10%,#42262d,transparent 35rem),radial-gradient(circle at 90% 90%,#342d43,transparent 35rem),#171315; }
+    html[data-theme="dark"] .auth-card { background:rgba(42,34,37,.94); border-color:rgba(255,255,255,.06); }
     @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
     @media (max-width:1000px) { .photo-grid{grid-template-columns:repeat(3,1fr)} .notes-grid{grid-template-columns:repeat(2,1fr)} .calendar-wrap{grid-template-columns:1fr} }
     @media (max-width:760px) {
       .shell{display:block}.sidebar{position:fixed; top:auto; bottom:0; left:0; right:0; width:100%; height:auto; padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)); border:0; border-top:1px solid var(--line); z-index:50}
       .brand,.side-quote{display:none}nav{margin:0; grid-template-columns:repeat(6,1fr); gap:2px}.nav-btn{display:grid; place-items:center; gap:1px; padding:7px 2px; font-size:9px; text-align:center}.nav-btn .ico{font-size:17px}.nav-btn:hover{transform:none}.nav-btn.active{box-shadow:none;background:#f4e7e5}
-      main{padding:24px 15px 105px}.topbar{margin-bottom:22px}.today-pill{display:none}.sync-pill{padding:9px}.sync-pill span:last-child{display:none}.cols-2,.cols-3,.fun-grid{grid-template-columns:1fr}.hero{min-height:300px}.calendar-wrap{display:block}.calendar-wrap>.card+ .card{margin-top:16px}.photo-grid{grid-template-columns:repeat(2,1fr)}.notes-grid{grid-template-columns:1fr}.mood-pick{grid-template-columns:repeat(5,1fr)}.mood-option{padding:11px 2px}.mood-option small{font-size:8px}.field-row{grid-template-columns:1fr 1fr}.day{min-height:51px;padding:6px 2px}.duration-grid{grid-template-columns:repeat(2,1fr)}
+      main{padding:24px 15px 105px}.topbar{margin-bottom:22px}.today-pill{display:none}.sync-pill{padding:9px}.sync-pill span:last-child{display:none}.theme-toggle{width:39px;padding:0;justify-content:center}.theme-label{display:none}.cols-2,.cols-3,.fun-grid{grid-template-columns:1fr}.hero{min-height:300px}.calendar-wrap{display:block}.calendar-wrap>.card+ .card{margin-top:16px}.photo-grid{grid-template-columns:repeat(2,1fr)}.notes-grid{grid-template-columns:1fr}.mood-pick{grid-template-columns:repeat(5,1fr)}.mood-option{padding:11px 2px}.mood-option small{font-size:8px}.field-row{grid-template-columns:1fr 1fr}.day{min-height:51px;padding:6px 2px}.duration-grid{grid-template-columns:repeat(2,1fr)}
     }
     @media (max-width:400px){ .nav-btn{font-size:0}.nav-btn .ico{font-size:19px}.photo-grid{grid-template-columns:1fr 1fr}.card{padding:18px}.flow-options{grid-template-columns:repeat(2,1fr)} }
   </style>
@@ -274,7 +318,7 @@
     <main>
       <header class="topbar">
         <div><div class="eyebrow" id="pageEyebrow">Your shared space</div><h1 id="pageTitle">Good to see you</h1></div>
-        <div class="top-actions"><div class="sync-pill" id="syncPill"><i class="sync-dot"></i><span id="syncStatus">Connecting…</span></div><div class="today-pill" id="todayText"></div></div>
+        <div class="top-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Change color theme"><span class="theme-icon" id="themeIcon">◐</span><span class="theme-label" id="themeLabel">Auto</span></button><div class="sync-pill" id="syncPill"><i class="sync-dot"></i><span id="syncStatus">Connecting…</span></div><div class="today-pill" id="todayText"></div></div>
       </header>
 
       <section class="tab active" id="home">
@@ -505,6 +549,16 @@
       if(id==='photos') renderPhotos(); if(id==='notes') renderNotes();
     }));
     $('#todayText').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+    let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto';
+    function applyTheme(){
+      const hour=new Date().getHours(),resolved=themeMode==='auto'?(hour>=7&&hour<19?'light':'dark'):themeMode;
+      document.documentElement.dataset.theme=resolved;document.documentElement.dataset.themeMode=themeMode;
+      $('#themeIcon').textContent=resolved==='dark'?'☾':'☀';$('#themeLabel').textContent=themeMode==='auto'?'Auto':themeMode[0].toUpperCase()+themeMode.slice(1);
+      $('#themeToggle').title=themeMode==='auto'?`Automatic theme · currently ${resolved} · click to use light`:`${themeMode[0].toUpperCase()+themeMode.slice(1)} theme · click to change`;
+      $('meta[name="theme-color"]').content=resolved==='dark'?'#181416':'#f7f1eb';
+    }
+    $('#themeToggle').onclick=()=>{const modes=['auto','light','dark'];themeMode=modes[(modes.indexOf(themeMode)+1)%modes.length];localStorage.setItem('ourLittleWorld.theme',themeMode);applyTheme();toast(themeMode==='auto'?'Theme will now follow the time of day':`${themeMode[0].toUpperCase()+themeMode.slice(1)} mode on`);};
+    applyTheme();setInterval(applyTheme,60000);window.addEventListener('focus',applyTheme);
     $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
     $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape') $$('.modal.open').forEach(m=>closeModal(m.id));});
