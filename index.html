@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f7f1eb">
   <title>Our Little World</title>
   <script>
-    (()=>{const mode=localStorage.getItem('ourLittleWorld.theme')||'auto',hour=new Date().getHours();document.documentElement.dataset.theme=mode==='auto'?(hour>=7&&hour<19?'light':'dark'):mode;document.documentElement.dataset.themeMode=mode;})();
+    (()=>{const mode=localStorage.getItem('ourLittleWorld.theme')||'auto',hour=new Date().getHours();document.documentElement.dataset.theme=mode==='auto'?(hour>=7&&hour<19?'light':'dark'):mode;document.documentElement.dataset.themeMode=mode;try{const p=JSON.parse(localStorage.getItem('ourLittleWorld.palette')||'null');if(p){const s=document.documentElement.style;s.setProperty('--bg',p.bg);s.setProperty('--rose',p.accent);s.setProperty('--rose-deep',p.accentDeep);s.setProperty('--paper-solid',p.surface);s.setProperty('--paper',p.surface+'dc');s.setProperty('--ink',p.ink);}}catch{}})();
   </script>
   <style>
     :root {
@@ -225,6 +225,28 @@
     .activity-copy small { display:block; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .activity-time { flex:0 0 auto; color:var(--muted); font-size:9px; }
     .profile-row { display:grid; grid-template-columns:1fr auto; gap:9px; align-items:end; margin-top:17px; }
+    .settings-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:18px; }
+    .settings-group { padding:18px 0; border-top:1px solid var(--line); }
+    .settings-group:first-of-type { border-top:0; padding-top:0; }
+    .settings-group h3 { margin:0 0 6px; font:400 19px Georgia,serif; }
+    .settings-group > p { color:var(--muted); font-size:12px; line-height:1.5; margin:0 0 14px; }
+    .theme-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+    .theme-choice { border:1px solid var(--line); border-radius:15px; padding:13px 8px; background:rgba(255,255,255,.45); cursor:pointer; text-align:center; }
+    .theme-choice span { display:block; font-size:21px; margin-bottom:4px; }
+    .theme-choice small { color:var(--muted); }
+    .theme-choice.active { border-color:var(--rose); background:var(--blush); color:var(--rose-deep); box-shadow:0 0 0 3px color-mix(in srgb,var(--rose) 12%,transparent); }
+    .color-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:11px; }
+    .color-field { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.34); }
+    .color-field label { margin:0; }
+    .color-field input[type="color"] { flex:0 0 39px; width:39px; height:34px; border:0; border-radius:10px; padding:2px; cursor:pointer; background:transparent; }
+    .preset-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .color-preset { width:35px; height:35px; border:3px solid rgba(255,255,255,.8); outline:1px solid var(--line); border-radius:50%; cursor:pointer; transition:.2s; }
+    .color-preset:hover { transform:scale(1.12); }
+    .about-card { position:relative; overflow:hidden; background:linear-gradient(145deg,#f6e2df,#eee7f1); }
+    .about-card::after { content:'♥'; position:absolute; right:-7px; bottom:-49px; font:150px Georgia,serif; color:rgba(184,100,115,.08); transform:rotate(-10deg); }
+    .about-mark { width:58px; height:58px; display:grid; place-items:center; border-radius:20px; color:white; background:var(--rose); font-size:24px; box-shadow:0 10px 25px color-mix(in srgb,var(--rose) 32%,transparent); }
+    .about-card blockquote { position:relative; z-index:1; margin:22px 0 0; font:400 20px/1.55 Georgia,serif; color:var(--ink); }
+    .about-card .version { display:inline-block; margin-top:20px; padding:7px 10px; border-radius:99px; color:var(--muted); background:rgba(255,255,255,.42); font-size:10px; }
     .theme-toggle { height:39px; border:1px solid rgba(255,255,255,.82); border-radius:99px; padding:0 13px; display:flex; align-items:center; gap:7px; cursor:pointer; color:var(--muted); background:rgba(255,255,255,.72); box-shadow:0 8px 28px rgba(72,53,57,.06); transition:.2s ease; }
     .theme-toggle:hover { transform:translateY(-1px); color:var(--ink); }
     .theme-icon { width:18px; font-size:15px; text-align:center; }
@@ -266,12 +288,15 @@
     html[data-theme="dark"] .author-avatar { background:#58343d; color:#ffc0cb; }html[data-theme="dark"] .author-avatar.partner { background:#463d52; color:#dcd0ef; }
     html[data-theme="dark"] .auth-screen { background:radial-gradient(circle at 15% 10%,#42262d,transparent 35rem),radial-gradient(circle at 90% 90%,#342d43,transparent 35rem),#171315; }
     html[data-theme="dark"] .auth-card { background:rgba(42,34,37,.94); border-color:rgba(255,255,255,.06); }
+    html[data-theme="dark"] .theme-choice,html[data-theme="dark"] .color-field { background:rgba(22,18,20,.45); }
+    html[data-theme="dark"] .theme-choice.active { background:#503039; }
+    html[data-theme="dark"] .about-card { background:linear-gradient(145deg,#482f34,#37313f); }
     @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
     @media (max-width:1000px) { .photo-grid{grid-template-columns:repeat(3,1fr)} .notes-grid{grid-template-columns:repeat(2,1fr)} .calendar-wrap{grid-template-columns:1fr} }
     @media (max-width:760px) {
       .shell{display:block}.sidebar{position:fixed; top:auto; bottom:0; left:0; right:0; width:100%; height:auto; padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)); border:0; border-top:1px solid var(--line); z-index:50}
-      .brand,.side-quote{display:none}nav{margin:0; grid-template-columns:repeat(6,1fr); gap:2px}.nav-btn{display:grid; place-items:center; gap:1px; padding:7px 2px; font-size:9px; text-align:center}.nav-btn .ico{font-size:17px}.nav-btn:hover{transform:none}.nav-btn.active{box-shadow:none;background:#f4e7e5}
-      main{padding:24px 15px 105px}.topbar{margin-bottom:22px}.today-pill{display:none}.sync-pill{padding:9px}.sync-pill span:last-child{display:none}.theme-toggle{width:39px;padding:0;justify-content:center}.theme-label{display:none}.cols-2,.cols-3,.fun-grid{grid-template-columns:1fr}.hero{min-height:300px}.calendar-wrap{display:block}.calendar-wrap>.card+ .card{margin-top:16px}.photo-grid{grid-template-columns:repeat(2,1fr)}.notes-grid{grid-template-columns:1fr}.mood-pick{grid-template-columns:repeat(5,1fr)}.mood-option{padding:11px 2px}.mood-option small{font-size:8px}.field-row{grid-template-columns:1fr 1fr}.day{min-height:51px;padding:6px 2px}.duration-grid{grid-template-columns:repeat(2,1fr)}
+      .brand,.side-quote{display:none}nav{margin:0; grid-template-columns:repeat(7,1fr); gap:2px}.nav-btn{display:grid; place-items:center; gap:1px; padding:7px 2px; font-size:9px; text-align:center}.nav-btn .ico{font-size:17px}.nav-btn:hover{transform:none}.nav-btn.active{box-shadow:none;background:#f4e7e5}
+      main{padding:24px 15px 105px}.topbar{margin-bottom:22px}.today-pill{display:none}.sync-pill{padding:9px}.sync-pill span:last-child{display:none}.theme-toggle{width:39px;padding:0;justify-content:center}.theme-label{display:none}.cols-2,.cols-3,.fun-grid,.settings-grid{grid-template-columns:1fr}.hero{min-height:300px}.calendar-wrap{display:block}.calendar-wrap>.card+ .card{margin-top:16px}.photo-grid{grid-template-columns:repeat(2,1fr)}.notes-grid{grid-template-columns:1fr}.mood-pick{grid-template-columns:repeat(5,1fr)}.mood-option{padding:11px 2px}.mood-option small{font-size:8px}.field-row{grid-template-columns:1fr 1fr}.day{min-height:51px;padding:6px 2px}.duration-grid{grid-template-columns:repeat(2,1fr)}
     }
     @media (max-width:400px){ .nav-btn{font-size:0}.nav-btn .ico{font-size:19px}.photo-grid{grid-template-columns:1fr 1fr}.card{padding:18px}.flow-options{grid-template-columns:repeat(2,1fr)} }
   </style>
@@ -311,6 +336,7 @@
         <button class="nav-btn" data-tab="photos"><span class="ico">▧</span>Photos</button>
         <button class="nav-btn" data-tab="together"><span class="ico">♡</span>Together</button>
         <button class="nav-btn" data-tab="notes"><span class="ico">✎</span>Notes</button>
+        <button class="nav-btn" data-tab="settings"><span class="ico">⚙</span>Settings</button>
       </nav>
       <div class="side-quote">“The best thing to hold onto in life is each other.”</div>
     </aside>
@@ -437,6 +463,30 @@
         <div class="note-toolbar"><input id="noteSearch" type="search" placeholder="Search your notes..."><button class="primary" id="newNote">＋ New note</button></div>
         <div class="notes-grid" id="notesGrid"></div>
       </section>
+
+      <section class="tab" id="settings">
+        <p class="section-lead">Make this little world feel like yours. Appearance settings are saved privately in this browser.</p>
+        <div class="settings-grid">
+          <article class="card">
+            <div class="card-title"><h2>Appearance</h2><span>Live preview</span></div>
+            <div class="settings-group">
+              <h3>Color mode</h3><p>Auto follows the time of day: light from 7 AM to 7 PM and dark overnight.</p>
+              <div class="theme-choices"><button class="theme-choice" data-theme-choice="auto"><span>◐</span><small>Automatic</small></button><button class="theme-choice" data-theme-choice="light"><span>☀</span><small>Light</small></button><button class="theme-choice" data-theme-choice="dark"><span>☾</span><small>Dark</small></button></div>
+            </div>
+            <div class="settings-group">
+              <h3>Custom colors</h3><p>Fine-tune the background, buttons, cards, and text. Changes preview instantly.</p>
+              <div class="color-grid"><div class="color-field"><label for="backgroundColor">Background</label><input type="color" id="backgroundColor" value="#f7f1eb"></div><div class="color-field"><label for="accentColor">Accent</label><input type="color" id="accentColor" value="#b86473"></div><div class="color-field"><label for="surfaceColor">Cards</label><input type="color" id="surfaceColor" value="#fffdfb"></div><div class="color-field"><label for="textColor">Text</label><input type="color" id="textColor" value="#382f33"></div></div>
+            </div>
+            <div class="settings-group"><h3>Accent presets</h3><p>Pick a quick accent, then customize it further above.</p><div class="preset-row"><button class="color-preset" data-accent="#b86473" style="background:#b86473" aria-label="Rose"></button><button class="color-preset" data-accent="#557fb3" style="background:#557fb3" aria-label="Ocean"></button><button class="color-preset" data-accent="#62866b" style="background:#62866b" aria-label="Forest"></button><button class="color-preset" data-accent="#8569a8" style="background:#8569a8" aria-label="Lavender"></button><button class="color-preset" data-accent="#ca7655" style="background:#ca7655" aria-label="Sunset"></button></div></div>
+            <div class="actions"><button class="primary" id="savePalette">Save colors</button><button class="ghost" id="resetPalette">Reset to default</button></div>
+          </article>
+          <article class="card about-card">
+            <div class="about-mark">♥</div><div class="eyebrow" style="margin-top:24px">About this project</div><h2 style="font:400 31px Georgia,serif;margin:7px 0">Our Little World</h2>
+            <blockquote>Made by Jan Byron Failagao (DeusLevolt). Made for Ezzel Joyce, but also free from anyone who want to use it.</blockquote>
+            <span class="version">Cloud edition · Made with care</span>
+          </article>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -541,7 +591,7 @@
     function renderActivity(){const feed=$('#activityFeed'),items=data.activity||[];feed.innerHTML=items.length?items.slice(0,8).map(item=>{const a=authorMeta(item);return`<div class="activity-item"><span class="author-avatar ${a.mine?'':'partner'}">${esc(a.initial)}</span><div class="activity-copy"><b>${esc(a.label)} ${esc(item.action)}</b>${item.detail?`<small>${esc(item.detail)}</small>`:''}</div><span class="activity-time">${new Date(item.date).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span></div>`}).join(''):'<div class="empty">New notes, moods, and updates from both of you will appear here.</div>';}
 
     const titles = {
-      home:['Your shared space','Good to see you'], calendar:['Cycle & wellness','Your calendar'], mood:['Emotional wellness','Mood check-in'], photos:['Moments that matter','Photo book'], together:['Your story in time','Together'], notes:['Words worth keeping','Notes']
+      home:['Your shared space','Good to see you'], calendar:['Cycle & wellness','Your calendar'], mood:['Emotional wellness','Mood check-in'], photos:['Moments that matter','Photo book'], together:['Your story in time','Together'], notes:['Words worth keeping','Notes'], settings:['Make it yours','Settings']
     };
     $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => {
       const id=btn.dataset.tab; $$('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn)); $$('.tab').forEach(t=>t.classList.toggle('active',t.id===id));
@@ -549,16 +599,29 @@
       if(id==='photos') renderPhotos(); if(id==='notes') renderNotes();
     }));
     $('#todayText').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
-    let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto';
+    let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto',palette=null;
+    try{palette=JSON.parse(localStorage.getItem('ourLittleWorld.palette')||'null')}catch{}
+    const paletteFields={bg:$('#backgroundColor'),accent:$('#accentColor'),surface:$('#surfaceColor'),ink:$('#textColor')};
+    const shadeColor=(hex,amount)=>'#'+hex.replace('#','').match(/.{2}/g).map(v=>Math.max(0,Math.min(255,parseInt(v,16)+amount)).toString(16).padStart(2,'0')).join('');
+    const paletteFromFields=()=>({bg:paletteFields.bg.value,accent:paletteFields.accent.value,accentDeep:shadeColor(paletteFields.accent.value,-35),surface:paletteFields.surface.value,ink:paletteFields.ink.value});
+    function applyPalette(value){const s=document.documentElement.style;if(!value){['--bg','--rose','--rose-deep','--paper-solid','--paper','--ink'].forEach(v=>s.removeProperty(v));return;}s.setProperty('--bg',value.bg);s.setProperty('--rose',value.accent);s.setProperty('--rose-deep',value.accentDeep||shadeColor(value.accent,-35));s.setProperty('--paper-solid',value.surface);s.setProperty('--paper',value.surface+'dc');s.setProperty('--ink',value.ink);}
+    function syncPaletteInputs(){const dark=document.documentElement.dataset.theme==='dark',defaults=dark?{bg:'#181416',accent:'#d47f90',surface:'#2c2427',ink:'#f4ebea'}:{bg:'#f7f1eb',accent:'#b86473',surface:'#fffdfb',ink:'#382f33'},shown=palette||defaults;Object.entries(paletteFields).forEach(([key,input])=>input.value=shown[key]);}
     function applyTheme(){
       const hour=new Date().getHours(),resolved=themeMode==='auto'?(hour>=7&&hour<19?'light':'dark'):themeMode;
       document.documentElement.dataset.theme=resolved;document.documentElement.dataset.themeMode=themeMode;
       $('#themeIcon').textContent=resolved==='dark'?'☾':'☀';$('#themeLabel').textContent=themeMode==='auto'?'Auto':themeMode[0].toUpperCase()+themeMode.slice(1);
       $('#themeToggle').title=themeMode==='auto'?`Automatic theme · currently ${resolved} · click to use light`:`${themeMode[0].toUpperCase()+themeMode.slice(1)} theme · click to change`;
       $('meta[name="theme-color"]').content=resolved==='dark'?'#181416':'#f7f1eb';
+      $$('.theme-choice').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===themeMode));if(!palette)syncPaletteInputs();
     }
-    $('#themeToggle').onclick=()=>{const modes=['auto','light','dark'];themeMode=modes[(modes.indexOf(themeMode)+1)%modes.length];localStorage.setItem('ourLittleWorld.theme',themeMode);applyTheme();toast(themeMode==='auto'?'Theme will now follow the time of day':`${themeMode[0].toUpperCase()+themeMode.slice(1)} mode on`);};
-    applyTheme();setInterval(applyTheme,60000);window.addEventListener('focus',applyTheme);
+    function setThemeMode(mode){themeMode=mode;localStorage.setItem('ourLittleWorld.theme',themeMode);applyTheme();toast(themeMode==='auto'?'Theme will now follow the time of day':`${themeMode[0].toUpperCase()+themeMode.slice(1)} mode on`);}
+    $('#themeToggle').onclick=()=>{const modes=['auto','light','dark'];setThemeMode(modes[(modes.indexOf(themeMode)+1)%modes.length]);};
+    $$('.theme-choice').forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeChoice));
+    Object.values(paletteFields).forEach(input=>input.oninput=()=>applyPalette(paletteFromFields()));
+    $$('.color-preset').forEach(b=>b.onclick=()=>{paletteFields.accent.value=b.dataset.accent;applyPalette(paletteFromFields());});
+    $('#savePalette').onclick=()=>{palette=paletteFromFields();localStorage.setItem('ourLittleWorld.palette',JSON.stringify(palette));applyPalette(palette);toast('Your colors are saved');};
+    $('#resetPalette').onclick=()=>{palette=null;localStorage.removeItem('ourLittleWorld.palette');applyPalette(null);applyTheme();syncPaletteInputs();toast('Colors reset to the theme defaults');};
+    applyPalette(palette);applyTheme();syncPaletteInputs();setInterval(applyTheme,60000);window.addEventListener('focus',applyTheme);
     $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
     $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape') $$('.modal.open').forEach(m=>closeModal(m.id));});
