@@ -212,6 +212,8 @@
     .data-box { margin-top:18px; display:flex; justify-content:space-between; align-items:center; gap:14px; padding:15px; border:1px solid var(--line); border-radius:16px; }
     .card { transition:transform .22s ease, box-shadow .22s ease; }
     .card:not(.hero):hover { transform:translateY(-2px); box-shadow:0 22px 62px rgba(75,52,57,.13); }
+    .dashboard-link { cursor:pointer; }
+    .dashboard-link:focus-visible { outline:3px solid color-mix(in srgb,var(--rose) 34%,transparent); outline-offset:3px; }
     .fun-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:18px; margin-top:18px; }
     .prompt-card { position:relative; overflow:hidden; min-height:190px; background:linear-gradient(145deg,#fff9f5,#f5e1de); }
     .prompt-card::after { content:'?'; position:absolute; right:18px; bottom:-34px; font:120px Georgia,serif; color:rgba(184,100,115,.07); transform:rotate(9deg); }
@@ -389,19 +391,19 @@
 
       <section class="tab active" id="home">
         <div class="grid cols-2">
-          <article class="card hero">
+          <article class="card hero dashboard-link" data-go-tab="together" role="button" tabindex="0" aria-label="Open Together">
             <div><div class="hero-kicker">Our story, still unfolding</div><h2 id="heroMessage">Every day together is worth remembering.</h2></div>
             <div class="live-time" id="homeDuration"></div>
           </article>
           <div class="grid">
-            <article class="card quick-stat"><div class="stat-icon pink">◷</div><div><small>Next expected period</small><b id="nextPeriod">Add cycle dates</b></div></article>
-            <article class="card quick-stat"><div class="stat-icon lav">☻</div><div><small>Latest mood</small><b id="latestMood">No check-in yet</b></div></article>
+            <article class="card quick-stat dashboard-link" data-go-tab="calendar" role="button" tabindex="0" aria-label="Open Calendar"><div class="stat-icon pink">◷</div><div><small>Next expected period</small><b id="nextPeriod">Add cycle dates</b></div></article>
+            <article class="card quick-stat dashboard-link" data-go-tab="mood" role="button" tabindex="0" aria-label="Open Mood"><div class="stat-icon lav">☻</div><div><small>Latest mood</small><b id="latestMood">No check-in yet</b></div></article>
           </div>
         </div>
         <div class="grid cols-3" style="margin-top:18px">
-          <article class="card quick-stat"><div class="stat-icon sage">▧</div><div><b id="photoCount">0 memories</b><small>in your photo book</small></div></article>
-          <article class="card quick-stat"><div class="stat-icon pink">✎</div><div><b id="noteCount">0 notes</b><small>thoughts saved</small></div></article>
-          <article class="card quick-stat"><div class="stat-icon lav">♡</div><div><b id="cycleDay">Cycle not set</b><small>personal cycle view</small></div></article>
+          <article class="card quick-stat dashboard-link" data-go-tab="photos" role="button" tabindex="0" aria-label="Open Photos"><div class="stat-icon sage">▧</div><div><b id="photoCount">0 memories</b><small>in your photo book</small></div></article>
+          <article class="card quick-stat dashboard-link" data-go-tab="notes" role="button" tabindex="0" aria-label="Open Notes"><div class="stat-icon pink">✎</div><div><b id="noteCount">0 notes</b><small>thoughts saved</small></div></article>
+          <article class="card quick-stat dashboard-link" data-go-tab="calendar" role="button" tabindex="0" aria-label="Open Calendar"><div class="stat-icon lav">♡</div><div><b id="cycleDay">Cycle not set</b><small>personal cycle view</small></div></article>
         </div>
         <article class="card memory-showcase empty-memory" id="memoryShowcase">
           <div class="memory-empty-content" id="memoryEmpty"><div><span>▧</span><b>Your memories will play here</b><small>Add photos in the Photo Book to begin the slideshow.</small></div></div>
@@ -413,7 +415,7 @@
             <div class="prompt-text" id="couplePrompt">What tiny moment with me always makes you smile?</div>
             <div class="actions"><button class="primary" id="newPrompt">Another question</button><button class="ghost love-btn" id="loveBtn" aria-label="Send a little love">♥ <span id="loveCount">0</span></button></div>
           </article>
-          <article class="card milestone">
+          <article class="card milestone dashboard-link" data-go-tab="together" role="button" tabindex="0" aria-label="Open Together">
             <div><div class="eyebrow">Next little milestone</div><div class="milestone-number" id="milestoneTitle">Set your beginning</div><small id="milestoneText" style="color:var(--muted)">Your countdown will appear here.</small></div>
             <div><div class="progress-track"><div class="progress-fill" id="milestoneProgress"></div></div></div>
           </article>
@@ -638,11 +640,14 @@
     const titles = {
       home:['Your shared space','Good to see you'], calendar:['Cycle & wellness','Your calendar'], mood:['Emotional wellness','Mood check-in'], photos:['Moments that matter','Photo book'], together:['Your story in time','Together'], notes:['Words worth keeping','Notes'], settings:['Make it yours','Settings']
     };
-    $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => {
-      const id=btn.dataset.tab; $$('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn)); $$('.tab').forEach(t=>t.classList.toggle('active',t.id===id));
+    function openTab(id){
+      const btn=document.querySelector(`.nav-btn[data-tab="${id}"]`);if(!btn)return;
+      $$('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn)); $$('.tab').forEach(t=>t.classList.toggle('active',t.id===id));
       $('#pageEyebrow').textContent=titles[id][0]; $('#pageTitle').textContent=titles[id][1]; window.scrollTo({top:0,behavior:'smooth'});
       if(id==='photos') renderPhotos(); if(id==='notes') renderNotes();
-    }));
+    }
+    $$('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.tab)));
+    $$('[data-go-tab]').forEach(card=>{card.addEventListener('click',e=>{if(!e.target.closest('button,a,input,textarea,select'))openTab(card.dataset.goTab)});card.addEventListener('keydown',e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openTab(card.dataset.goTab)}})});
     $('#todayText').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
     let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto',resolvedTheme='';
     localStorage.removeItem('ourLittleWorld.palettes');localStorage.removeItem('ourLittleWorld.palette');
