@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f7f1eb">
   <title>Our Little World</title>
   <script>
-    (()=>{const mode=localStorage.getItem('ourLittleWorld.theme')||'auto',hour=new Date().getHours(),resolved=mode==='auto'?(hour>=7&&hour<19?'light':'dark'):mode;document.documentElement.dataset.theme=resolved;document.documentElement.dataset.themeMode=mode;try{const sets=JSON.parse(localStorage.getItem('ourLittleWorld.palettes')||'null'),legacy=JSON.parse(localStorage.getItem('ourLittleWorld.palette')||'null'),p=sets?.[resolved]||legacy;if(p){const s=document.documentElement.style;s.setProperty('--bg',p.bg);s.setProperty('--rose',p.accent);s.setProperty('--rose-deep',p.accentDeep);s.setProperty('--paper-solid',p.surface);s.setProperty('--paper',p.surface+'dc');s.setProperty('--ink',p.ink);}}catch{}})();
+    (()=>{const mode=localStorage.getItem('ourLittleWorld.theme')||'auto',hour=new Date().getHours(),resolved=mode==='auto'?(hour>=7&&hour<19?'light':'dark'):mode;document.documentElement.dataset.theme=resolved;document.documentElement.dataset.themeMode=mode;})();
   </script>
   <style>
     :root {
@@ -268,18 +268,16 @@
     .settings-group h3 { margin:0 0 6px; font:400 19px Georgia,serif; }
     .mode-badge { display:inline-block; vertical-align:middle; margin-left:5px; padding:4px 7px; border-radius:99px; color:var(--rose-deep); background:var(--blush); font:700 9px/1 ui-sans-serif,system-ui,sans-serif; letter-spacing:.08em; text-transform:uppercase; }
     .settings-group > p { color:var(--muted); font-size:12px; line-height:1.5; margin:0 0 14px; }
-    .theme-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
-    .theme-choice { border:1px solid var(--line); border-radius:15px; padding:13px 8px; background:rgba(255,255,255,.45); cursor:pointer; text-align:center; }
-    .theme-choice span { display:block; font-size:21px; margin-bottom:4px; }
-    .theme-choice small { color:var(--muted); }
-    .theme-choice.active { border-color:var(--rose); background:var(--blush); color:var(--rose-deep); box-shadow:0 0 0 3px color-mix(in srgb,var(--rose) 12%,transparent); }
-    .color-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:11px; }
-    .color-field { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.34); }
-    .color-field label { margin:0; }
-    .color-field input[type="color"] { flex:0 0 39px; width:39px; height:34px; border:0; border-radius:10px; padding:2px; cursor:pointer; background:transparent; }
-    .preset-row { display:flex; gap:10px; flex-wrap:wrap; }
-    .color-preset { width:35px; height:35px; border:3px solid rgba(255,255,255,.8); outline:1px solid var(--line); border-radius:50%; cursor:pointer; transition:.2s; }
-    .color-preset:hover { transform:scale(1.12); }
+    .auto-theme-row { position:relative; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:17px; border:1px solid var(--line); border-radius:17px; background:rgba(255,255,255,.4); cursor:pointer; }
+    .auto-theme-row b { display:block; color:var(--ink); font-size:13px; }
+    .auto-theme-row small { display:block; color:var(--muted); margin-top:4px; line-height:1.4; }
+    .auto-theme-row input { position:absolute; opacity:0; pointer-events:none; }
+    .theme-switch { flex:0 0 54px; width:54px; height:30px; padding:3px; border-radius:99px; background:#cfc5c6; box-shadow:inset 0 1px 3px rgba(57,43,46,.15); transition:.22s ease; }
+    .theme-switch::after { content:'–'; width:24px; height:24px; display:grid; place-items:center; border-radius:50%; color:#76686c; background:white; box-shadow:0 3px 8px rgba(57,43,46,.2); font-size:12px; transition:.22s ease; }
+    .auto-theme-row input:checked + .theme-switch { background:var(--rose); }
+    .auto-theme-row input:checked + .theme-switch::after { content:'✓'; color:var(--rose-deep); transform:translateX(24px); }
+    .auto-theme-row input:focus-visible + .theme-switch { outline:3px solid color-mix(in srgb,var(--rose) 24%,transparent); outline-offset:3px; }
+    .theme-schedule { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; padding:11px 13px; border-radius:14px; color:var(--muted); background:var(--blush); font-size:11px; }
     .about-card { position:relative; overflow:hidden; background:linear-gradient(145deg,#f6e2df,#eee7f1); }
     .about-card::after { content:'♥'; position:absolute; right:-7px; bottom:-49px; font:150px Georgia,serif; color:rgba(184,100,115,.08); transform:rotate(-10deg); }
     .about-mark { width:58px; height:58px; display:grid; place-items:center; border-radius:20px; color:white; background:var(--rose); font-size:24px; box-shadow:0 10px 25px color-mix(in srgb,var(--rose) 32%,transparent); }
@@ -327,8 +325,8 @@
     html[data-theme="dark"] .author-avatar { background:#58343d; color:#ffc0cb; }html[data-theme="dark"] .author-avatar.partner { background:#463d52; color:#dcd0ef; }
     html[data-theme="dark"] .auth-screen { background:radial-gradient(circle at 15% 10%,#42262d,transparent 35rem),radial-gradient(circle at 90% 90%,#342d43,transparent 35rem),#171315; }
     html[data-theme="dark"] .auth-card { background:rgba(42,34,37,.94); border-color:rgba(255,255,255,.06); }
-    html[data-theme="dark"] .theme-choice,html[data-theme="dark"] .color-field { background:rgba(22,18,20,.45); }
-    html[data-theme="dark"] .theme-choice.active { background:#503039; }
+    html[data-theme="dark"] .auto-theme-row { background:rgba(22,18,20,.45); }
+    html[data-theme="dark"] .theme-switch { background:#5e5155; }
     html[data-theme="dark"] .about-card { background:linear-gradient(145deg,#482f34,#37313f); }
     @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
     @media (max-width:1000px) { .photo-grid{grid-template-columns:repeat(3,1fr)} .notes-grid{grid-template-columns:repeat(2,1fr)} .calendar-wrap{grid-template-columns:1fr} }
@@ -522,15 +520,10 @@
           <article class="card">
             <div class="card-title"><h2>Appearance</h2><span>Live preview</span></div>
             <div class="settings-group">
-              <h3>Color mode</h3><p>Auto follows the time of day: light from 7 AM to 7 PM and dark overnight.</p>
-              <div class="theme-choices"><button class="theme-choice" data-theme-choice="auto"><span>◐</span><small>Automatic</small></button><button class="theme-choice" data-theme-choice="light"><span>☀</span><small>Light</small></button><button class="theme-choice" data-theme-choice="dark"><span>☾</span><small>Dark</small></button></div>
+              <h3>Automatic theme <span class="mode-badge" id="autoThemeBadge">On</span></h3><p>Let the website choose colors that are comfortable for the current time of day.</p>
+              <label class="auto-theme-row" for="autoThemeSwitch"><span><b>Follow time of day</b><small id="autoThemeStatus">Light during the day, dark at night</small></span><input type="checkbox" id="autoThemeSwitch" role="switch"><span class="theme-switch" aria-hidden="true"></span></label>
+              <div class="theme-schedule"><span>☀ Light · 7 AM–7 PM</span><span>☾ Dark · 7 PM–7 AM</span></div>
             </div>
-            <div class="settings-group">
-              <h3>Custom colors <span class="mode-badge" id="paletteModeName">Light palette</span></h3><p id="paletteHelp">Fine-tune colors for light mode. Dark mode keeps its own separate palette, and changes preview instantly.</p>
-              <div class="color-grid"><div class="color-field"><label for="backgroundColor">Background</label><input type="color" id="backgroundColor" value="#f7f1eb"></div><div class="color-field"><label for="accentColor">Accent</label><input type="color" id="accentColor" value="#b86473"></div><div class="color-field"><label for="surfaceColor">Cards</label><input type="color" id="surfaceColor" value="#fffdfb"></div><div class="color-field"><label for="textColor">Text</label><input type="color" id="textColor" value="#382f33"></div></div>
-            </div>
-            <div class="settings-group"><h3>Accent presets</h3><p>Pick a quick accent, then customize it further above.</p><div class="preset-row"><button class="color-preset" data-accent="#b86473" style="background:#b86473" aria-label="Rose"></button><button class="color-preset" data-accent="#557fb3" style="background:#557fb3" aria-label="Ocean"></button><button class="color-preset" data-accent="#62866b" style="background:#62866b" aria-label="Forest"></button><button class="color-preset" data-accent="#8569a8" style="background:#8569a8" aria-label="Lavender"></button><button class="color-preset" data-accent="#ca7655" style="background:#ca7655" aria-label="Sunset"></button></div></div>
-            <div class="actions"><button class="primary" id="savePalette">Save for this mode</button><button class="ghost" id="resetPalette">Use recommended colors</button><button class="text-btn" id="resetAllPalettes">Reset both modes</button></div>
           </article>
           <article class="card about-card">
             <div class="about-mark">♥</div><div class="eyebrow" style="margin-top:24px">About this project</div><h2 style="font:400 31px Georgia,serif;margin:7px 0">Our Little World</h2>
@@ -651,33 +644,21 @@
       if(id==='photos') renderPhotos(); if(id==='notes') renderNotes();
     }));
     $('#todayText').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
-    let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto',palettes={light:null,dark:null},resolvedTheme='',paletteDirty=false;
-    try{palettes={...palettes,...(JSON.parse(localStorage.getItem('ourLittleWorld.palettes')||'null')||{})};const legacy=JSON.parse(localStorage.getItem('ourLittleWorld.palette')||'null');if(legacy){const initial=document.documentElement.dataset.theme||'light';palettes[initial]=palettes[initial]||legacy;localStorage.setItem('ourLittleWorld.palettes',JSON.stringify(palettes));localStorage.removeItem('ourLittleWorld.palette');}}catch{}
-    const paletteFields={bg:$('#backgroundColor'),accent:$('#accentColor'),surface:$('#surfaceColor'),ink:$('#textColor')};
-    const shadeColor=(hex,amount)=>'#'+hex.replace('#','').match(/.{2}/g).map(v=>Math.max(0,Math.min(255,parseInt(v,16)+amount)).toString(16).padStart(2,'0')).join('');
-    const paletteFromFields=()=>({bg:paletteFields.bg.value,accent:paletteFields.accent.value,accentDeep:shadeColor(paletteFields.accent.value,-35),surface:paletteFields.surface.value,ink:paletteFields.ink.value});
-    function applyPalette(value){const s=document.documentElement.style;if(!value){['--bg','--rose','--rose-deep','--paper-solid','--paper','--ink'].forEach(v=>s.removeProperty(v));return;}s.setProperty('--bg',value.bg);s.setProperty('--rose',value.accent);s.setProperty('--rose-deep',value.accentDeep||shadeColor(value.accent,-35));s.setProperty('--paper-solid',value.surface);s.setProperty('--paper',value.surface+'dc');s.setProperty('--ink',value.ink);}
-    function syncPaletteInputs(mode=resolvedTheme){const defaults=mode==='dark'?{bg:'#181416',accent:'#d47f90',surface:'#2c2427',ink:'#f4ebea'}:{bg:'#f7f1eb',accent:'#b86473',surface:'#fffdfb',ink:'#382f33'},shown=palettes[mode]||defaults;Object.entries(paletteFields).forEach(([key,input])=>input.value=shown[key]);}
-    function applyTheme(force=false){
+    let themeMode=localStorage.getItem('ourLittleWorld.theme')||'auto',resolvedTheme='';
+    localStorage.removeItem('ourLittleWorld.palettes');localStorage.removeItem('ourLittleWorld.palette');
+    function applyTheme(){
       const hour=new Date().getHours(),resolved=themeMode==='auto'?(hour>=7&&hour<19?'light':'dark'):themeMode;
-      const changed=resolved!==resolvedTheme;resolvedTheme=resolved;
+      resolvedTheme=resolved;
       document.documentElement.dataset.theme=resolved;document.documentElement.dataset.themeMode=themeMode;
       $('#themeIcon').textContent=resolved==='dark'?'☾':'☀';$('#themeLabel').textContent=themeMode==='auto'?'Auto':themeMode[0].toUpperCase()+themeMode.slice(1);
       $('#themeToggle').title=themeMode==='auto'?`Automatic theme · currently ${resolved} · click to use light`:`${themeMode[0].toUpperCase()+themeMode.slice(1)} theme · click to change`;
-      if(changed||force){paletteDirty=false;applyPalette(palettes[resolved]||null);syncPaletteInputs(resolved);}
-      $('meta[name="theme-color"]').content=palettes[resolved]?.bg||(resolved==='dark'?'#181416':'#f7f1eb');
-      $('#paletteModeName').textContent=`${resolved} palette`;$('#paletteHelp').textContent=`Fine-tune colors for ${resolved} mode. ${resolved==='light'?'Dark':'Light'} mode keeps its own separate palette, and changes preview instantly.`;
-      $$('.theme-choice').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===themeMode));
+      $('meta[name="theme-color"]').content=resolved==='dark'?'#181416':'#f7f1eb';
+      $('#autoThemeSwitch').checked=themeMode==='auto';$('#autoThemeBadge').textContent=themeMode==='auto'?'On':'Off';$('#autoThemeStatus').textContent=themeMode==='auto'?`Currently using ${resolved} colors`:`Keeping ${resolved} colors until you change them`;
     }
-    function setThemeMode(mode){themeMode=mode;localStorage.setItem('ourLittleWorld.theme',themeMode);applyTheme(true);toast(themeMode==='auto'?'Theme will now follow the time of day':`${themeMode[0].toUpperCase()+themeMode.slice(1)} mode on`);}
+    function setThemeMode(mode){themeMode=mode;localStorage.setItem('ourLittleWorld.theme',themeMode);applyTheme();toast(themeMode==='auto'?'Theme will now follow the time of day':`${themeMode[0].toUpperCase()+themeMode.slice(1)} mode on`);}
     $('#themeToggle').onclick=()=>{const modes=['auto','light','dark'];setThemeMode(modes[(modes.indexOf(themeMode)+1)%modes.length]);};
-    $$('.theme-choice').forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeChoice));
-    Object.values(paletteFields).forEach(input=>input.oninput=()=>{paletteDirty=true;applyPalette(paletteFromFields());});
-    $$('.color-preset').forEach(b=>b.onclick=()=>{paletteFields.accent.value=b.dataset.accent;paletteDirty=true;applyPalette(paletteFromFields());});
-    $('#savePalette').onclick=()=>{palettes[resolvedTheme]=paletteFromFields();paletteDirty=false;localStorage.setItem('ourLittleWorld.palettes',JSON.stringify(palettes));applyTheme(true);toast(`${resolvedTheme[0].toUpperCase()+resolvedTheme.slice(1)} colors are saved`);};
-    $('#resetPalette').onclick=()=>{palettes[resolvedTheme]=null;paletteDirty=false;localStorage.setItem('ourLittleWorld.palettes',JSON.stringify(palettes));applyTheme(true);toast(`${resolvedTheme[0].toUpperCase()+resolvedTheme.slice(1)} mode is using recommended colors`);};
-    $('#resetAllPalettes').onclick=()=>{palettes={light:null,dark:null};paletteDirty=false;localStorage.removeItem('ourLittleWorld.palettes');localStorage.removeItem('ourLittleWorld.palette');applyPalette(null);applyTheme(true);toast('Light and dark colors reset');};
-    applyTheme(true);setInterval(()=>applyTheme(false),60000);window.addEventListener('focus',()=>applyTheme(false));
+    $('#autoThemeSwitch').onchange=e=>setThemeMode(e.target.checked?'auto':resolvedTheme);
+    applyTheme();setInterval(applyTheme,60000);window.addEventListener('focus',applyTheme);
     $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
     $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape') $$('.modal.open').forEach(m=>closeModal(m.id));});
